@@ -1,0 +1,67 @@
+2025-07-11 02:30:31,703 - app.services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 02:30:31,703 - app.services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 02:43:06,861 - app.services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 02:43:06,862 - app.services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 02:44:50,106 - app.services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 02:44:50,106 - app.services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 02:45:25,242 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-11 02:46:23,858 - app.services.immobilien_bot_manager.BotManager - ERROR - Fehler beim Starten des Bots für User 1: name 'UserBot' is not defined
+2025-07-11 02:56:21,070 - app.services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 02:56:21,070 - app.services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 03:33:02,275 - app.services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 03:33:02,275 - app.services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 20:44:23,139 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-11 20:54:36,451 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 20:54:36,451 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 20:55:59,507 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-11 21:09:32,023 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 21:09:32,023 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 22:48:13,605 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-11 23:14:17,525 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 23:14:17,526 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 23:15:04,597 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-11 23:21:24,411 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-11 23:21:24,411 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-11 23:22:19,370 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-07-12 18:44:03,268 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-12 18:44:03,268 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-12 18:49:09,288 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-12 18:49:09,289 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-12 19:00:09,915 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-07-12 19:00:09,917 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-07-12 19:01:13,302 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.13/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'

@@ -1,0 +1,19 @@
+{
+    "python.pythonPath": "./backend/venv/bin/python",
+    "python.defaultInterpreterPath": "./backend/venv/bin/python",
+    "python.analysis.extraPaths": [
+        "./backend"
+    ],
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "basedpyright.analysis.pythonPath": "./backend/venv/bin/python",
+    "basedpyright.analysis.extraPaths": [
+        "./backend"
+    ],
+    "pylsp.plugins.pycodestyle.enabled": false,
+    "pylsp.plugins.pylint.enabled": false,
+    "files.associations": {
+        "*.py": "python"
+    }
+} 
