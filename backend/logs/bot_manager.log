@@ -162,3 +162,6 @@
 {"asctime": "2025-07-12 21:29:40", "name": "bot.maintenance", "levelname": "INFO", "message": "Starte Wartungsaufgaben...", "user_id": null, "taskName": "Task-3", "timestamp": "2025-07-12T21:29:40.956999"}
 {"asctime": "2025-07-12 21:29:40", "name": "bot.maintenance", "levelname": "INFO", "message": "Metriken aktualisiert: 0 Bewerbungen, 0 erfolgreich, 0 Fehler", "user_id": null, "taskName": "Task-3", "timestamp": "2025-07-12T21:29:40.984001"}
 {"asctime": "2025-07-12 21:29:40", "name": "bot.maintenance", "levelname": "INFO", "message": "Wartungsaufgaben abgeschlossen", "user_id": null, "taskName": "Task-3", "timestamp": "2025-07-12T21:29:40.984750"}
+{"asctime": "2025-07-12 21:59:40", "name": "bot.maintenance", "levelname": "INFO", "message": "Starte Wartungsaufgaben...", "user_id": null, "taskName": "Task-3", "timestamp": "2025-07-12T21:59:40.953032"}
+{"asctime": "2025-07-12 21:59:40", "name": "bot.maintenance", "levelname": "INFO", "message": "Metriken aktualisiert: 0 Bewerbungen, 0 erfolgreich, 0 Fehler", "user_id": null, "taskName": "Task-3", "timestamp": "2025-07-12T21:59:40.974081"}
+{"asctime": "2025-07-12 21:59:40", "name": "bot.maintenance", "levelname": "INFO", "message": "Wartungsaufgaben abgeschlossen", "user_id": null, "taskName": "Task-3", "timestamp": "2025-07-12T21:59:40.974726"}
