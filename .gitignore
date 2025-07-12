@@ -1,0 +1,20 @@
+# Documentation folder
+docs/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.env
+
+# Expo
+.expo/
+
+# Logs
+*.log 
