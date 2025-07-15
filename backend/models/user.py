@@ -14,6 +14,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     is_admin = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
+    profile_completed = Column(Boolean, default=False)
     filter_einstellungen = Column(Text)
     bewerbungsprofil = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -24,3 +25,4 @@ class User(Base):
     nachrichten = relationship("Nachricht", back_populates="user")
     bot_status = relationship("BotStatus", back_populates="user", uselist=False)
     bot_logs = relationship("BotLog", back_populates="user")
+    chat_messages = relationship("ChatMessage", back_populates="user")

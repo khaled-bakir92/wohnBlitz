@@ -43,9 +43,9 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"sub": user.email})
-    refresh_token = create_refresh_token(data={"sub": user.email})
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": user.email, "is_admin": user.is_admin})
+    refresh_token = create_refresh_token(data={"sub": user.email, "is_admin": user.is_admin})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "is_admin": user.is_admin, "profile_completed": user.profile_completed}
 
 
 @router.post("/token", response_model=Token)
@@ -61,9 +61,9 @@ def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token(data={"sub": user.email})
-    refresh_token = create_refresh_token(data={"sub": user.email})
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": user.email, "is_admin": user.is_admin})
+    refresh_token = create_refresh_token(data={"sub": user.email, "is_admin": user.is_admin})
+    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "is_admin": user.is_admin, "profile_completed": user.profile_completed}
 
 
 @router.post("/refresh", response_model=Token)
@@ -83,10 +83,10 @@ def refresh_access_token(token_data: TokenRefresh, db: Session = Depends(get_db)
             )
         
         # Create new tokens
-        access_token = create_access_token(data={"sub": user.email})
-        refresh_token = create_refresh_token(data={"sub": user.email})
+        access_token = create_access_token(data={"sub": user.email, "is_admin": user.is_admin})
+        refresh_token = create_refresh_token(data={"sub": user.email, "is_admin": user.is_admin})
         
-        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "is_admin": user.is_admin, "profile_completed": user.profile_completed}
         
     except HTTPException:
         raise
@@ -121,6 +121,9 @@ def update_bewerbungsprofil(
     # Save updated profile as JSON string
     current_user.bewerbungsprofil = json.dumps(existing_profil, ensure_ascii=False)
     
+    # Mark profile as completed
+    current_user.profile_completed = True
+    
     db.commit()
     db.refresh(current_user)
     
@@ -140,3 +143,31 @@ def get_bewerbungsprofil(
         return json.loads(current_user.bewerbungsprofil)
     except json.JSONDecodeError:
         return {}
+
+
+@router.get("/me", response_model=User)
+def get_current_user_info(
+    current_user: UserModel = Depends(get_current_active_user)
+):
+    """Get current user's information including admin status"""
+    return current_user
+
+
+@router.put("/filter-einstellungen", response_model=User)
+def update_filter_einstellungen(
+    filter_data: dict,
+    current_user: UserModel = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Update user's filter settings"""
+    
+    # Get the filter settings from the request
+    filter_einstellungen = filter_data.get('filter_einstellungen', '{}')
+    
+    # Update the user's filter settings
+    current_user.filter_einstellungen = filter_einstellungen
+    
+    db.commit()
+    db.refresh(current_user)
+    
+    return current_user

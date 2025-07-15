@@ -14,7 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { ProfileService } from '../services/profileService';
+import { ProfileService } from '@/user/profileService';
 
 const WohnBlitzLogo = () => (
   <View style={styles.logoContainer}>
@@ -76,7 +76,11 @@ const DropdownPicker = ({ value, onValueChange, options, placeholder }: {
   );
 };
 
-export default function ProfileScreen() {
+interface ProfileFormProps {
+  onComplete?: (data: any) => void;
+}
+
+export default function ProfileScreen({ onComplete }: ProfileFormProps = {}) {
   const [anrede, setAnrede] = useState('');
   const [name, setName] = useState('');
   const [vorname, setVorname] = useState('');
@@ -87,8 +91,10 @@ export default function ProfileScreen() {
   const anredeOptions = ['Frau', 'Herr', 'Divers'];
 
   useEffect(() => {
-    loadExistingProfile();
-  }, []);
+    if (!onComplete) {
+      loadExistingProfile();
+    }
+  }, [onComplete]);
 
   const loadExistingProfile = async () => {
     const existingProfile = await ProfileService.getBewerbungsprofil();
@@ -102,6 +108,12 @@ export default function ProfileScreen() {
   };
 
   const handleWeiter = async () => {
+    // Validate required fields
+    if (!anrede || !name || !vorname || !email || !telefon) {
+      Alert.alert('Fehler', 'Bitte füllen Sie alle Felder aus.');
+      return;
+    }
+
     setIsLoading(true);
 
     const profileData = {
@@ -112,13 +124,19 @@ export default function ProfileScreen() {
       telefon,
     };
 
-    const success = await ProfileService.updateBewerbungsprofil(profileData);
-
-    if (success) {
-      console.log('Profile data saved:', profileData);
-      router.push('/profile2');
+    if (onComplete) {
+      // Used in profile completion flow
+      onComplete(profileData);
     } else {
-      Alert.alert('Fehler', 'Profil konnte nicht gespeichert werden.');
+      // Standalone usage
+      const success = await ProfileService.updateBewerbungsprofil(profileData);
+
+      if (success) {
+        console.log('Profile data saved:', profileData);
+        router.push('/user/profile2');
+      } else {
+        Alert.alert('Fehler', 'Profil konnte nicht gespeichert werden.');
+      }
     }
 
     setIsLoading(false);

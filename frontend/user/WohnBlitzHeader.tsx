@@ -5,9 +5,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Surface } from 'react-native-paper';
 import { router } from 'expo-router';
-import { ProfileService } from '@/services/profileService';
-import { useNotifications } from '@/contexts/NotificationContext';
-import NotificationModal, { NotificationModalRef } from './NotificationModal';
+import { ProfileService } from './profileService';
+import { useNotifications } from '@/shared/contexts/NotificationContext';
+import NotificationModal, { NotificationModalRef } from '@/shared/NotificationModal';
 
 interface WohnBlitzHeaderProps {
   onNotificationPress?: () => void;
@@ -83,8 +83,15 @@ export default function WohnBlitzHeader({
   };
 
   const handleNotificationItemPress = (notification: any) => {
-    // Handle notification item press - could navigate to specific screen
     console.log('Notification item pressed:', notification);
+    
+    // Close the notification modal first
+    notificationModalRef.current?.dismiss();
+    
+    // Navigate to chat with the conversation ID
+    if (notification.id) {
+      router.push(`/user/chat/${notification.id}`);
+    }
   };
 
   const handleProfileIconPress = () => {

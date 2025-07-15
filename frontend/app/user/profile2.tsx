@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { ProfileService } from '../services/profileService';
+import { ProfileService } from '@/user/profileService';
 
 const WohnBlitzLogo = () => (
   <View style={styles.logoContainer}>
@@ -31,15 +31,21 @@ const WohnBlitzLogo = () => (
   </View>
 );
 
-export default function Profile2Screen() {
+interface Profile2FormProps {
+  onComplete?: (data: any) => void;
+}
+
+export default function Profile2Screen({ onComplete }: Profile2FormProps = {}) {
   const [strasse, setStrasse] = useState('');
   const [plz, setPlz] = useState('');
   const [ort, setOrt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    loadExistingProfile();
-  }, []);
+    if (!onComplete) {
+      loadExistingProfile();
+    }
+  }, [onComplete]);
 
   const loadExistingProfile = async () => {
     const existingProfile = await ProfileService.getBewerbungsprofil();
@@ -51,6 +57,12 @@ export default function Profile2Screen() {
   };
 
   const handleWeiter = async () => {
+    // Validate required fields
+    if (!strasse || !plz || !ort) {
+      Alert.alert('Fehler', 'Bitte füllen Sie alle Adressfelder aus.');
+      return;
+    }
+
     setIsLoading(true);
 
     const addressData = {
@@ -59,13 +71,19 @@ export default function Profile2Screen() {
       ort,
     };
 
-    const success = await ProfileService.updateBewerbungsprofil(addressData);
-
-    if (success) {
-      console.log('Address data saved:', addressData);
-      router.push('/wbs');
+    if (onComplete) {
+      // Used in profile completion flow
+      onComplete(addressData);
     } else {
-      Alert.alert('Fehler', 'Adressdaten konnten nicht gespeichert werden.');
+      // Standalone usage
+      const success = await ProfileService.updateBewerbungsprofil(addressData);
+
+      if (success) {
+        console.log('Address data saved:', addressData);
+        router.push('/user/wbs');
+      } else {
+        Alert.alert('Fehler', 'Adressdaten konnten nicht gespeichert werden.');
+      }
     }
 
     setIsLoading(false);

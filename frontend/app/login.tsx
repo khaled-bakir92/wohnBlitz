@@ -8,13 +8,13 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ProfileService } from '@/services/profileService';
+import Toast from 'react-native-toast-message';
+import { ProfileService } from '@/user/profileService';
 
 const WohnBlitzLogo = () => (
   <View style={styles.logoContainer}>
@@ -57,12 +57,36 @@ export default function LoginScreen() {
         
         // If we have a valid token, try to navigate directly
         if (existingToken) {
-          const isProfileComplete = await ProfileService.isProfileComplete();
-          if (isProfileComplete) {
-            router.replace('/(tabs)');
-          } else {
-            router.replace('/profile');
+          try {
+            // Check if user is admin
+            const userInfoResponse = await fetch('http://localhost:8000/api/me', {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${existingToken}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (userInfoResponse.ok) {
+              const userInfo = await userInfoResponse.json();
+              const isAdmin = userInfo.is_admin === true || userInfo.is_admin === 1;
+              const profileCompleted = userInfo.profile_completed === true;
+              console.log('Auto-login check - userInfo.is_admin:', userInfo.is_admin, 'converted to:', isAdmin);
+              console.log('Auto-login check - userInfo.profile_completed:', userInfo.profile_completed, 'converted to:', profileCompleted);
+              if (isAdmin) {
+                router.replace('/admin' as any);
+                return;
+              } else if (!profileCompleted) {
+                router.replace('/user/profile-completion');
+                return;
+              }
+            }
+          } catch (error) {
+            console.error('Error checking admin status:', error);
           }
+          
+          // Regular user flow - go directly to user dashboard
+          router.replace('/user');
           return;
         }
         
@@ -106,32 +130,57 @@ export default function LoginScreen() {
           await AsyncStorage.removeItem('stored_password');
         }
         
-        // Check if profile is complete to determine navigation
-        const isProfileComplete = await ProfileService.isProfileComplete();
+        // Check if user is admin and profile completion status
+        const isAdmin = data.is_admin === true || data.is_admin === 1;
+        const profileCompleted = data.profile_completed === true;
+        console.log('Login response is_admin:', data.is_admin, 'converted to:', isAdmin);
+        console.log('Login response profile_completed:', data.profile_completed, 'converted to:', profileCompleted);
         
-        if (showAlert) {
-          Alert.alert('Erfolg', 'Anmeldung erfolgreich!', [
-            {
-              text: 'OK',
-              onPress: () => {
-                if (isProfileComplete) {
-                  router.replace('/(tabs)');
-                } else {
-                  router.replace('/profile');
-                }
-              },
-            },
-          ]);
-        } else {
-          if (isProfileComplete) {
-            router.replace('/(tabs)');
+        if (isAdmin) {
+          // Admin users go directly to admin dashboard
+          if (showAlert) {
+            Toast.show({
+              type: 'success',
+              text1: 'Anmeldung erfolgreich!',
+              text2: 'Willkommen im Admin-Bereich',
+              position: 'top',
+              visibilityTime: 1500,
+            });
+            setTimeout(() => {
+              router.replace('/admin' as any);
+            }, 1500);
           } else {
-            router.replace('/profile');
+            router.replace('/admin' as any);
+          }
+        } else if (!profileCompleted) {
+          // Regular users without completed profile go directly to profile completion
+          router.replace('/user/profile-completion');
+        } else {
+          // Regular users with completed profile go to user dashboard
+          if (showAlert) {
+            Toast.show({
+              type: 'success',
+              text1: 'Anmeldung erfolgreich!',
+              text2: 'Willkommen zurück',
+              position: 'top',
+              visibilityTime: 1500,
+            });
+            setTimeout(() => {
+              router.replace('/user');
+            }, 1500);
+          } else {
+            router.replace('/user');
           }
         }
       } else {
         if (showAlert) {
-          Alert.alert('Anmeldung fehlgeschlagen', data.detail || 'Unbekannter Fehler');
+          Toast.show({
+            type: 'error',
+            text1: 'Anmeldung fehlgeschlagen',
+            text2: data.detail || 'Unbekannter Fehler',
+            position: 'top',
+            visibilityTime: 3000,
+          });
         }
         // Clear stored credentials if auto-login fails
         await AsyncStorage.removeItem('stay_logged_in');
@@ -140,7 +189,13 @@ export default function LoginScreen() {
       }
     } catch (error) {
       if (showAlert) {
-        Alert.alert('Verbindungsfehler', 'Bitte überprüfen Sie Ihre Internetverbindung.');
+        Toast.show({
+          type: 'error',
+          text1: 'Verbindungsfehler',
+          text2: 'Bitte überprüfen Sie Ihre Internetverbindung',
+          position: 'top',
+          visibilityTime: 3000,
+        });
       }
       console.error('Login error:', error);
       // Clear stored credentials if auto-login fails
@@ -154,7 +209,13 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Fehler', 'Bitte geben Sie E-Mail und Passwort ein.');
+      Toast.show({
+        type: 'error',
+        text1: 'Fehlende Eingaben',
+        text2: 'Bitte geben Sie E-Mail und Passwort ein',
+        position: 'top',
+        visibilityTime: 2500,
+      });
       return;
     }
 

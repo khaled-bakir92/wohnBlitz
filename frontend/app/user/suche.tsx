@@ -4,8 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text, Surface, Button, Card, Portal, Provider, Divider } from 'react-native-paper';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import WohnBlitzHeader from '@/components/WohnBlitzHeader';
-import { useNotifications } from '@/contexts/NotificationContext';
+import WohnBlitzHeader from '@/user/WohnBlitzHeader';
+import { useNotifications } from '@/shared/contexts/NotificationContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,11 +20,13 @@ interface SearchActivity {
 export default function SearchScreen() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchStartTime, setSearchStartTime] = useState<Date | null>(null);
+  const [searchDuration, setSearchDuration] = useState(0);
   const { addNotification } = useNotifications();
   const [searchStats, setSearchStats] = useState({
     foundApartments: 0,
     checkedPortals: 0,
-    lastUpdate: new Date()
+    lastUpdate: new Date(),
+    processedApartments: 0
   });
   const [searchHistory, setSearchHistory] = useState<SearchActivity[]>([
     {
@@ -53,8 +55,6 @@ export default function SearchScreen() {
   // Animation values
   const pulseAnim = new Animated.Value(1);
   const progressAnim = new Animated.Value(0);
-  const statusOpacity = new Animated.Value(0);
-  const scaleAnim = new Animated.Value(1);
 
   // Simulate search progress
   useEffect(() => {
@@ -75,51 +75,56 @@ export default function SearchScreen() {
         ])
       );
       
-      // Start progress animation
+      // Start progress animation (slower progress)
       const progressAnimation = Animated.timing(progressAnim, {
         toValue: 1,
-        duration: 3000,
+        duration: 60000, // 60 seconds for full progress instead of 3
         useNativeDriver: false,
-      });
-
-      // Start status opacity animation
-      const statusAnimation = Animated.timing(statusOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
       });
 
       pulseAnimation.start();
       progressAnimation.start();
-      statusAnimation.start();
+
+      // Update search duration every second
+      const durationInterval = setInterval(() => {
+        if (searchStartTime) {
+          const now = new Date();
+          const duration = Math.floor((now.getTime() - searchStartTime.getTime()) / 1000);
+          setSearchDuration(duration);
+        }
+      }, 1000);
 
       // Simulate finding apartments
-      const interval = setInterval(() => {
-        setSearchStats(prev => ({
-          ...prev,
-          foundApartments: prev.foundApartments + Math.floor(Math.random() * 3),
-          checkedPortals: prev.checkedPortals + 1,
-          lastUpdate: new Date()
-        }));
-      }, 1500);
+      const searchInterval = setInterval(() => {
+        setSearchStats(prev => {
+          // Only increment if we haven't reached the maximum
+          const newCheckedPortals = prev.checkedPortals < 8 
+            ? prev.checkedPortals + 1 
+            : prev.checkedPortals;
+          
+          return {
+            ...prev,
+            foundApartments: prev.foundApartments + Math.floor(Math.random() * 2),
+            checkedPortals: newCheckedPortals,
+            processedApartments: prev.processedApartments + Math.floor(Math.random() * 5) + 1,
+            lastUpdate: new Date()
+          };
+        });
+      }, 3000); // Slower update interval
 
       return () => {
-        clearInterval(interval);
+        clearInterval(durationInterval);
+        clearInterval(searchInterval);
         pulseAnimation.stop();
         progressAnimation.stop();
       };
     } else {
       // Reset animations
-      Animated.timing(statusOpacity, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }).start();
-      
       progressAnim.setValue(0);
       pulseAnim.setValue(1);
+      setSearchDuration(0);
     }
-  }, [isSearching]);
+  }, [isSearching, searchStartTime]);
 
   const toggleSearch = () => {
     const now = new Date();
@@ -150,6 +155,7 @@ export default function SearchScreen() {
       setSearchStats({
         foundApartments: 0,
         checkedPortals: 0,
+        processedApartments: 0,
         lastUpdate: new Date()
       });
     } else {
@@ -219,21 +225,22 @@ export default function SearchScreen() {
     </TouchableOpacity>
   );
 
+  const formatDuration = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${secs}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    } else {
+      return `${secs}s`;
+    }
+  };
+
   const StatusCard = () => (
-    <Animated.View
-      style={[
-        styles.statusCard,
-        {
-          opacity: statusOpacity,
-          transform: [{
-            translateY: statusOpacity.interpolate({
-              inputRange: [0, 1],
-              outputRange: [50, 0]
-            })
-          }]
-        }
-      ]}
-    >
+    <View style={styles.statusCard}>
       <Surface style={styles.statusSurface} elevation={4}>
         <View style={styles.statusHeader}>
           <View style={styles.liveIndicator}>
@@ -242,33 +249,44 @@ export default function SearchScreen() {
           </View>
           <Text style={styles.statusTitle}>Suche läuft...</Text>
         </View>
+
+        {/* Search Start Time and Duration */}
+        {searchStartTime && (
+          <View style={styles.searchTimeContainer}>
+            <View style={styles.timeItem}>
+              <Ionicons name="calendar" size={16} color="#3b82f6" />
+              <Text style={styles.timeLabel}>Gestartet:</Text>
+              <Text style={styles.timeValue}>
+                {searchStartTime.toLocaleDateString('de-DE')}
+              </Text>
+            </View>
+            <View style={styles.timeItem}>
+              <Ionicons name="time" size={16} color="#10b981" />
+              <Text style={styles.timeLabel}>Dauer:</Text>
+              <Text style={styles.timeValue}>{formatDuration(searchDuration)}</Text>
+            </View>
+          </View>
+        )}
         
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{String(searchStats.foundApartments || 0)}</Text>
-            <Text style={styles.statLabel}>Wohnungen gefunden</Text>
+            <Text style={styles.statLabel}>Beworbene Wohnungen</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{String(searchStats.checkedPortals || 0)}</Text>
-            <Text style={styles.statLabel}>Portale durchsucht</Text>
+            <Text style={styles.statNumber}>{String(searchStats.processedApartments || 0)}</Text>
+            <Text style={styles.statLabel}>Anzeigen geprüft</Text>
           </View>
         </View>
 
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressLabel}>Suchfortschritt</Text>
-          <View style={styles.progressBar}>
-            <Animated.View
-              style={[
-                styles.progressFill,
-                {
-                  width: progressAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%']
-                  })
-                }
-              ]}
-            />
+        {/* Additional Stats Row */}
+        <View style={styles.additionalStatsContainer}>
+          <View style={styles.additionalStatItem}>
+            <Ionicons name="search" size={16} color="#6b7280" />
+            <Text style={styles.additionalStatLabel}>
+              {searchStats.checkedPortals} von 8 Portalen durchsucht
+            </Text>
           </View>
         </View>
 
@@ -276,7 +294,7 @@ export default function SearchScreen() {
           Letzte Aktualisierung: {searchStats.lastUpdate.toLocaleTimeString('de-DE')}
         </Text>
       </Surface>
-    </Animated.View>
+    </View>
   );
 
   const ActivityHistoryCard = () => {
@@ -600,6 +618,54 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#9ca3af',
     textAlign: 'center',
+  },
+  searchTimeContainer: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    gap: 12,
+  },
+  timeItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  timeLabel: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  timeValue: {
+    fontSize: 14,
+    color: '#1f2937',
+    fontWeight: '600',
+  },
+  additionalStatsContainer: {
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f3f4f6',
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+    marginBottom: 16,
+  },
+  additionalStatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  additionalStatLabel: {
+    fontSize: 13,
+    color: '#6b7280',
+    fontWeight: '500',
+  },
+  progressPercent: {
+    fontSize: 12,
+    color: '#6b7280',
+    textAlign: 'right',
+    marginTop: 4,
+    fontWeight: '500',
   },
   activitySection: {
     marginTop: 20,

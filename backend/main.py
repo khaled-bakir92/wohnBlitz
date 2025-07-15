@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 from core.logging_config import get_logger
 from database.database import engine
-from models import bewerbung, bot_status, nachricht, statistik, user
+from models import bewerbung, bot_status, nachricht, statistik, user, chat
 from routers import (
     admin,
     auth,
@@ -13,6 +13,8 @@ from routers import (
     nachrichten,
     statistiken,
     support,
+    chat as chat_router,
+    push_notifications,
 )
 from services.bot_maintenance import maintenance_service
 from fastapi import FastAPI
@@ -22,6 +24,7 @@ logger = get_logger("main")
 
 # Datenbank-Tabellen erstellen
 user.Base.metadata.create_all(bind=engine)
+chat.Base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager
@@ -75,6 +78,8 @@ app.include_router(nachrichten.router)
 app.include_router(bot.router)
 app.include_router(filter.router)
 app.include_router(support.router)
+app.include_router(chat_router.router)
+app.include_router(push_notifications.router)
 app.include_router(monitoring.router)
 
 

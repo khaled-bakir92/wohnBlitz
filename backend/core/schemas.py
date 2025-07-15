@@ -26,18 +26,20 @@ class User(UserBase):
     id: int
     is_admin: bool = False
     is_active: bool = True
+    profile_completed: bool = False
     filter_einstellungen: Optional[str] = None
     bewerbungsprofil: Optional[str] = None
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class Token(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    is_admin: bool = False
+    profile_completed: bool = False
 
 
 class TokenRefresh(BaseModel):
@@ -62,8 +64,7 @@ class Bewerbung(BewerbungBase):
     bewerbungsdatum: datetime
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class StatistikBase(BaseModel):
@@ -82,8 +83,7 @@ class Statistik(StatistikBase):
     user_id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class NachrichtBase(BaseModel):
@@ -103,8 +103,7 @@ class Nachricht(NachrichtBase):
     ist_gelesen: bool = False
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 class BewerbungsprofilUpdate(BaseModel):

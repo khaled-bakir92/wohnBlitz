@@ -14,7 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { ProfileService } from '../services/profileService';
+import { ProfileService } from '@/user/profileService';
 
 const WohnBlitzLogo = () => (
   <View style={styles.logoContainer}>
@@ -89,7 +89,11 @@ const DropdownPicker = ({ value, onValueChange, options, placeholder }: {
   );
 };
 
-export default function WBSScreen() {
+interface WBSFormProps {
+  onComplete?: (data: any) => void;
+}
+
+export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
   const [wbsVorhanden, setWbsVorhanden] = useState('nein');
   const [wbsGueltigBis, setWbsGueltigBis] = useState('');
   const [wbsZimmeranzahl, setWbsZimmeranzahl] = useState('1');
@@ -101,8 +105,10 @@ export default function WBSScreen() {
   const einkommensgrenzeOptions = ['WBS 100', 'WBS 140', 'WBS 160', 'WBS 180', 'WBS 220'];
 
   useEffect(() => {
-    loadExistingProfile();
-  }, []);
+    if (!onComplete) {
+      loadExistingProfile();
+    }
+  }, [onComplete]);
 
   const loadExistingProfile = async () => {
     const existingProfile = await ProfileService.getBewerbungsprofil();
@@ -181,18 +187,24 @@ export default function WBSScreen() {
       wbs_besonderer_wohnbedarf: wbsBesondererWohnbedarf,
     };
 
-    const success = await ProfileService.updateBewerbungsprofil(wbsData);
-
-    if (success) {
-      console.log('WBS data saved:', wbsData);
-      Alert.alert('Erfolg', 'Bewerbungsprofil vollständig gespeichert!', [
-        {
-          text: 'OK',
-          onPress: () => router.replace('/(tabs)'),
-        },
-      ]);
+    if (onComplete) {
+      // Used in profile completion flow
+      onComplete(wbsData);
     } else {
-      Alert.alert('Fehler', 'WBS-Daten konnten nicht gespeichert werden.');
+      // Standalone usage
+      const success = await ProfileService.updateBewerbungsprofil(wbsData);
+
+      if (success) {
+        console.log('WBS data saved:', wbsData);
+        Alert.alert('Erfolg', 'Bewerbungsprofil vollständig gespeichert!', [
+          {
+            text: 'OK',
+            onPress: () => router.replace('/user'),
+          },
+        ]);
+      } else {
+        Alert.alert('Fehler', 'WBS-Daten konnten nicht gespeichert werden.');
+      }
     }
 
     setIsLoading(false);

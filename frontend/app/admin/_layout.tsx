@@ -7,12 +7,14 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { NotificationProvider } from '@/shared/contexts/NotificationContext';
 
-export default function TabLayout() {
+export default function AdminTabLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <Tabs
+    <NotificationProvider>
+      <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
@@ -27,33 +29,34 @@ export default function TabLayout() {
         }),
       }}>
       <Tabs.Screen
-        name="index"
+        name="dashboard"
         options={{
           title: 'Dashboard',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="user-management"
         options={{
-          title: 'Suchfilter',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="line.3.horizontal.decrease.circle" color={color} />,
+          title: 'User-Verwaltung',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.2.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="suche"
+        name="index"
         options={{
-          title: 'Suche',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="magnifyingglass.circle.fill" color={color} />,
+          title: 'Bot',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bolt.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="profil"
+        name="messages"
         options={{
-          title: 'Profil',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
+          title: 'Nachrichten',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="message.fill" color={color} />,
         }}
       />
     </Tabs>
+    </NotificationProvider>
   );
-}
+} 
