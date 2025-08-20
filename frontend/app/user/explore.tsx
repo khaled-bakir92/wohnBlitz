@@ -1,25 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  FlatList,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { 
-  Text, 
-  Surface, 
-  TextInput, 
+import {
+  Text,
+  Surface,
+  TextInput,
   Menu,
   TouchableRipple,
   Modal,
   Portal,
-  Checkbox
+  Checkbox,
 } from 'react-native-paper';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import WohnBlitzHeader from '@/user/WohnBlitzHeader';
+import { API_BASE_URL } from '@/constants/api';
 
 // Berlin districts list
 const BERLIN_DISTRICTS = [
   'CHARLOTTENBURG-WILMERSDORF',
-  'FRIEDRICHSHAIN-KREUZBERG', 
+  'FRIEDRICHSHAIN-KREUZBERG',
   'LICHTENBERG',
   'MARZAHN-HELLERSDORF',
   'MITTE',
@@ -29,13 +37,15 @@ const BERLIN_DISTRICTS = [
   'SPANDAU',
   'STEGLITZ-ZEHLENDORF',
   'TEMPELHOF-SCHÖNEBERG',
-  'TREPTOW-KÖPENICK'
+  'TREPTOW-KÖPENICK',
 ];
 
 export default function SuchfilterScreen() {
   const [maxMiete, setMaxMiete] = useState('');
   const [minZimmer, setMinZimmer] = useState('1 Zimmer');
-  const [ausgeschlosseneBezirke, setAusgeschlosseneBezirke] = useState<string[]>([]);
+  const [ausgeschlosseneBezirke, setAusgeschlosseneBezirke] = useState<
+    string[]
+  >([]);
   const [zimmerMenuVisible, setZimmerMenuVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,10 +55,10 @@ export default function SuchfilterScreen() {
 
   const zimmerOptions = [
     '1 Zimmer',
-    '2 Zimmer', 
+    '2 Zimmer',
     '3 Zimmer',
     '4 Zimmer',
-    '5+ Zimmer'
+    '5+ Zimmer',
   ];
 
   useEffect(() => {
@@ -61,10 +71,10 @@ export default function SuchfilterScreen() {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:8000/api/me', {
+      const response = await fetch(`${API_BASE_URL}/api/me`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
@@ -74,8 +84,12 @@ export default function SuchfilterScreen() {
         if (userInfo.filter_einstellungen) {
           try {
             const filters = JSON.parse(userInfo.filter_einstellungen);
-            const hasAnyFilters = filters.maxMiete || filters.minZimmer !== '1 Zimmer' || (filters.ausgeschlosseneBezirke && filters.ausgeschlosseneBezirke.length > 0);
-            
+            const hasAnyFilters =
+              filters.maxMiete ||
+              filters.minZimmer !== '1 Zimmer' ||
+              (filters.ausgeschlosseneBezirke &&
+                filters.ausgeschlosseneBezirke.length > 0);
+
             if (hasAnyFilters) {
               setHasExistingFilters(true);
               if (filters.maxMiete) setMaxMiete(filters.maxMiete);
@@ -83,10 +97,15 @@ export default function SuchfilterScreen() {
               if (filters.ausgeschlosseneBezirke) {
                 // Handle both string and array formats
                 if (typeof filters.ausgeschlosseneBezirke === 'string') {
-                  const bezirkeArray = filters.ausgeschlosseneBezirke.split(',').map(b => b.trim().toUpperCase()).filter(b => b);
+                  const bezirkeArray = filters.ausgeschlosseneBezirke
+                    .split(',')
+                    .map(b => b.trim().toUpperCase())
+                    .filter(b => b);
                   setAusgeschlosseneBezirke(bezirkeArray);
                 } else if (Array.isArray(filters.ausgeschlosseneBezirke)) {
-                  setAusgeschlosseneBezirke(filters.ausgeschlosseneBezirke.map(b => b.toUpperCase()));
+                  setAusgeschlosseneBezirke(
+                    filters.ausgeschlosseneBezirke.map(b => b.toUpperCase())
+                  );
                 }
               }
             }
@@ -123,14 +142,19 @@ export default function SuchfilterScreen() {
         ausgeschlosseneBezirke: ausgeschlosseneBezirke,
       };
 
-      const response = await fetch('http://localhost:8000/api/filter-einstellungen', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ filter_einstellungen: JSON.stringify(filterData) }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/filter-einstellungen`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            filter_einstellungen: JSON.stringify(filterData),
+          }),
+        }
+      );
 
       if (response.ok) {
         setHasExistingFilters(true);
@@ -202,9 +226,9 @@ export default function SuchfilterScreen() {
     <View style={styles.container}>
       {/* Header */}
       <WohnBlitzHeader />
-      
+
       <View style={styles.contentContainer}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
@@ -212,12 +236,14 @@ export default function SuchfilterScreen() {
           {/* Title */}
           <View style={styles.titleContainer}>
             <Text style={styles.mainTitle}>Suchfilter</Text>
-            <Text style={styles.subtitle}>Passen Sie Ihre Wohnungssuche an Ihre Bedürfnisse an</Text>
+            <Text style={styles.subtitle}>
+              Passen Sie Ihre Wohnungssuche an Ihre Bedürfnisse an
+            </Text>
             {hasExistingFilters && !isEditMode && (
               <View style={styles.filterStatusContainer}>
                 <Ionicons name="checkmark-circle" size={20} color="#10B981" />
                 <Text style={styles.filterStatusText}>Filter gespeichert</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.editButton}
                   onPress={() => setIsEditMode(true)}
                 >
@@ -229,18 +255,35 @@ export default function SuchfilterScreen() {
           </View>
 
           {/* Filter Card */}
-          <View style={[styles.filterCard, hasExistingFilters && !isEditMode && styles.filterCardReadOnly]}>
+          <View
+            style={[
+              styles.filterCard,
+              hasExistingFilters && !isEditMode && styles.filterCardReadOnly,
+            ]}
+          >
             {/* Max. Miete */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Maximale Miete</Text>
               {hasExistingFilters && !isEditMode ? (
                 <View style={styles.readOnlyContainer}>
-                  <Ionicons name="cash-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                  <Text style={styles.readOnlyText}>{maxMiete || 'Nicht festgelegt'}</Text>
+                  <Ionicons
+                    name="cash-outline"
+                    size={20}
+                    color="#6B7280"
+                    style={styles.inputIcon}
+                  />
+                  <Text style={styles.readOnlyText}>
+                    {maxMiete || 'Nicht festgelegt'}
+                  </Text>
                 </View>
               ) : (
                 <View style={styles.inputContainer}>
-                  <Ionicons name="cash-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                  <Ionicons
+                    name="cash-outline"
+                    size={20}
+                    color="#9CA3AF"
+                    style={styles.inputIcon}
+                  />
                   <TextInput
                     style={styles.modernInput}
                     value={maxMiete}
@@ -258,7 +301,12 @@ export default function SuchfilterScreen() {
               <Text style={styles.label}>Mindestanzahl Zimmer</Text>
               {hasExistingFilters && !isEditMode ? (
                 <View style={styles.readOnlyContainer}>
-                  <Ionicons name="home-outline" size={20} color="#6B7280" style={styles.inputIcon} />
+                  <Ionicons
+                    name="home-outline"
+                    size={20}
+                    color="#6B7280"
+                    style={styles.inputIcon}
+                  />
                   <Text style={styles.readOnlyText}>{minZimmer}</Text>
                 </View>
               ) : (
@@ -270,7 +318,12 @@ export default function SuchfilterScreen() {
                       onPress={() => setZimmerMenuVisible(true)}
                       style={styles.modernDropdown}
                     >
-                      <Ionicons name="home-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
+                      <Ionicons
+                        name="home-outline"
+                        size={20}
+                        color="#9CA3AF"
+                        style={styles.inputIcon}
+                      />
                       <Text style={styles.dropdownValue}>{minZimmer}</Text>
                       <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
                     </TouchableOpacity>
@@ -297,16 +350,38 @@ export default function SuchfilterScreen() {
               <Text style={styles.label}>Ausgeschlossene Bezirke</Text>
               {hasExistingFilters && !isEditMode ? (
                 <View style={styles.readOnlyContainer}>
-                  <Ionicons name="location-outline" size={20} color="#6B7280" style={styles.inputIcon} />
-                  <Text style={styles.readOnlyText}>{getSelectedBezirkeText()}</Text>
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    color="#6B7280"
+                    style={styles.inputIcon}
+                  />
+                  <Text style={styles.readOnlyText}>
+                    {getSelectedBezirkeText()}
+                  </Text>
                 </View>
               ) : (
                 <TouchableOpacity
                   style={styles.bezirkeSelector}
                   onPress={() => setBezirkeModalVisible(true)}
                 >
-                  <Ionicons name="location-outline" size={20} color="#9CA3AF" style={styles.inputIcon} />
-                  <Text style={[styles.dropdownValue, { color: ausgeschlosseneBezirke.length > 0 ? '#1F2937' : '#9CA3AF' }]}>
+                  <Ionicons
+                    name="location-outline"
+                    size={20}
+                    color="#9CA3AF"
+                    style={styles.inputIcon}
+                  />
+                  <Text
+                    style={[
+                      styles.dropdownValue,
+                      {
+                        color:
+                          ausgeschlosseneBezirke.length > 0
+                            ? '#1F2937'
+                            : '#9CA3AF',
+                      },
+                    ]}
+                  >
                     {getSelectedBezirkeText()}
                   </Text>
                   <Ionicons name="chevron-down" size={20} color="#9CA3AF" />
@@ -317,8 +392,8 @@ export default function SuchfilterScreen() {
 
           {/* Save Button */}
           {(isEditMode || !hasExistingFilters) && (
-            <TouchableOpacity 
-              style={[styles.saveButton, isSaving && styles.saveButtonDisabled]} 
+            <TouchableOpacity
+              style={[styles.saveButton, isSaving && styles.saveButtonDisabled]}
               onPress={saveFilters}
               disabled={isSaving}
             >
@@ -351,14 +426,15 @@ export default function SuchfilterScreen() {
                   <Ionicons name="close" size={24} color="#6B7280" />
                 </TouchableOpacity>
               </View>
-              
+
               <Text style={styles.modalSubtitle}>
-                Wählen Sie die Bezirke aus, die von der Suche ausgeschlossen werden sollen:
+                Wählen Sie die Bezirke aus, die von der Suche ausgeschlossen
+                werden sollen:
               </Text>
-              
+
               <FlatList
                 data={BERLIN_DISTRICTS}
-                keyExtractor={(item) => item}
+                keyExtractor={item => item}
                 style={styles.bezirkeList}
                 renderItem={({ item }) => (
                   <TouchableOpacity
@@ -366,14 +442,18 @@ export default function SuchfilterScreen() {
                     onPress={() => toggleBezirk(item)}
                   >
                     <Checkbox
-                      status={ausgeschlosseneBezirke.includes(item) ? 'checked' : 'unchecked'}
+                      status={
+                        ausgeschlosseneBezirke.includes(item)
+                          ? 'checked'
+                          : 'unchecked'
+                      }
                       onPress={() => toggleBezirk(item)}
                     />
                     <Text style={styles.bezirkName}>{item}</Text>
                   </TouchableOpacity>
                 )}
               />
-              
+
               <View style={styles.modalFooter}>
                 <TouchableOpacity
                   style={styles.modalButton}

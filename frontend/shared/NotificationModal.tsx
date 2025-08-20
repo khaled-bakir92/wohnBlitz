@@ -1,8 +1,24 @@
-import React, { useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image } from 'react-native';
+import React, {
+  useCallback,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { Surface, Divider, Badge } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
-import { BottomSheetModal, BottomSheetView, BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import {
+  BottomSheetModal,
+  BottomSheetView,
+  BottomSheetScrollView,
+} from '@gorhom/bottom-sheet';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export interface NotificationItem {
@@ -29,8 +45,20 @@ export interface NotificationModalRef {
   dismiss: () => void;
 }
 
-const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProps>(
-  ({ notifications, onNotificationPress, onMarkAsRead, onMarkAllAsRead, onClearAll }, ref) => {
+const NotificationModal = forwardRef<
+  NotificationModalRef,
+  NotificationModalProps
+>(
+  (
+    {
+      notifications,
+      onNotificationPress,
+      onMarkAsRead,
+      onMarkAllAsRead,
+      onClearAll,
+    },
+    ref
+  ) => {
     const bottomSheetModalRef = React.useRef<BottomSheetModal>(null);
 
     const snapPoints = useMemo(() => ['50%', '85%'], []);
@@ -76,14 +104,16 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
 
     const formatTimeAgo = (date: Date) => {
       const now = new Date();
-      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-      
+      const diffInMinutes = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60)
+      );
+
       if (diffInMinutes < 1) return 'Gerade eben';
       if (diffInMinutes < 60) return `vor ${diffInMinutes} Min.`;
-      
+
       const diffInHours = Math.floor(diffInMinutes / 60);
       if (diffInHours < 24) return `vor ${diffInHours} Std.`;
-      
+
       const diffInDays = Math.floor(diffInHours / 24);
       return `vor ${diffInDays} Tag${diffInDays > 1 ? 'en' : ''}`;
     };
@@ -99,7 +129,7 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
           key={notification.id}
           style={[
             styles.notificationItem,
-            !notification.isRead && styles.unreadNotification
+            !notification.isRead && styles.unreadNotification,
           ]}
           onPress={() => {
             if (!notification.isRead && onMarkAsRead) {
@@ -112,30 +142,30 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
         >
           <View style={styles.notificationContent}>
             <View style={[styles.iconContainer, { backgroundColor }]}>
-              <MaterialIcons 
-                name={icon.name as any} 
-                size={24} 
-                color={icon.color} 
+              <MaterialIcons
+                name={icon.name as any}
+                size={24}
+                color={icon.color}
               />
             </View>
-            
+
             <View style={styles.textContainer}>
               <View style={styles.headerRow}>
-                <Text style={[
-                  styles.notificationTitle,
-                  !notification.isRead && styles.unreadTitle
-                ]}>
+                <Text
+                  style={[
+                    styles.notificationTitle,
+                    !notification.isRead && styles.unreadTitle,
+                  ]}
+                >
                   {notification.title}
                 </Text>
-                {!notification.isRead && (
-                  <View style={styles.unreadDot} />
-                )}
+                {!notification.isRead && <View style={styles.unreadDot} />}
               </View>
-              
+
               <Text style={styles.notificationMessage} numberOfLines={2}>
                 {notification.message}
               </Text>
-              
+
               <Text style={styles.notificationTime}>
                 {formatTimeAgo(notification.timestamp)}
               </Text>
@@ -143,8 +173,8 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
 
             {notification.imageUrl && (
               <View style={styles.imageContainer}>
-                <Image 
-                  source={{ uri: notification.imageUrl }} 
+                <Image
+                  source={{ uri: notification.imageUrl }}
                   style={styles.notificationImage}
                 />
               </View>
@@ -165,10 +195,10 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
               </Badge>
             )}
           </View>
-          
+
           <View style={styles.headerActions}>
             {unreadCount > 0 && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.actionButton}
                 onPress={onMarkAllAsRead}
               >
@@ -176,17 +206,16 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
                 <Text style={styles.actionButtonText}>Alle lesen</Text>
               </TouchableOpacity>
             )}
-            
-            <TouchableOpacity 
-              style={styles.actionButton}
-              onPress={onClearAll}
-            >
+
+            <TouchableOpacity style={styles.actionButton} onPress={onClearAll}>
               <MaterialIcons name="clear-all" size={20} color="#6b7280" />
-              <Text style={[styles.actionButtonText, { color: '#6b7280' }]}>Löschen</Text>
+              <Text style={[styles.actionButtonText, { color: '#6b7280' }]}>
+                Löschen
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
-        
+
         <LinearGradient
           colors={['rgba(59, 130, 246, 0.1)', 'transparent']}
           style={styles.headerGradient}
@@ -219,11 +248,11 @@ const NotificationModal = forwardRef<NotificationModalRef, NotificationModalProp
       >
         <BottomSheetView style={styles.container}>
           {renderHeader()}
-          
+
           {notifications.length === 0 ? (
             renderEmptyState()
           ) : (
-            <BottomSheetScrollView 
+            <BottomSheetScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
             >

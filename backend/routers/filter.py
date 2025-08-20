@@ -1,11 +1,12 @@
 from typing import Optional
 
-from core.auth import get_current_active_user
-from database.database import get_db
-from models.user import User
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+
+from core.auth import get_current_active_user, get_current_user_with_profile
+from database.database import get_db
+from models.user import User
 
 router = APIRouter(prefix="/api/filter", tags=["filter"])
 
@@ -29,7 +30,7 @@ def get_filter_settings(
 def save_filter_settings(
     filter_data: FilterSettings,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user_with_profile),
 ):
     current_user.filter_einstellungen = filter_data.filter_einstellungen
     db.commit()
@@ -41,7 +42,7 @@ def save_filter_settings(
 def update_filter_settings(
     filter_data: FilterSettings,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user_with_profile),
 ):
     current_user.filter_einstellungen = filter_data.filter_einstellungen
     db.commit()
@@ -51,7 +52,7 @@ def update_filter_settings(
 
 @router.delete("/")
 def delete_filter_settings(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user_with_profile)
 ):
     current_user.filter_einstellungen = None
     db.commit()

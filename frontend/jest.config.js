@@ -12,9 +12,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/$1',
     'react-native': 'react-native-web',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(@react-native|react-native))',
-  ],
+  transformIgnorePatterns: ['node_modules/(?!(@react-native|react-native))'],
   collectCoverageFrom: [
     'app/**/*.{ts,tsx,js,jsx}',
     'components/**/*.{ts,tsx,js,jsx}',
@@ -22,4 +20,4 @@ module.exports = {
     '!**/node_modules/**',
     '!**/.expo/**',
   ],
-}; 
+};

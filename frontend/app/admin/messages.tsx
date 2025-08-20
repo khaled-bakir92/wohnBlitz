@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, FlatList, TextInput, KeyboardAvoidingView, Platform, Alert, RefreshControl, Animated, PanGestureHandler, State } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  FlatList,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+  RefreshControl,
+  Animated,
+  PanGestureHandler,
+  State,
+} from 'react-native';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { Text, Surface, Modal, Portal, Button } from 'react-native-paper';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import UniversalHeader from '@/shared/UniversalHeader';
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { API_BASE_URL } from '@/constants/api';
+import {
+  GestureHandlerRootView,
+  Swipeable,
+} from 'react-native-gesture-handler';
 
 interface Message {
   id: string;
@@ -31,13 +52,16 @@ interface Conversation {
 export default function AdminMessagesScreen() {
   const insets = useSafeAreaInsets();
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] =
+    useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [chatModalVisible, setChatModalVisible] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
+  const [filteredConversations, setFilteredConversations] = useState<
+    Conversation[]
+  >([]);
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -52,10 +76,18 @@ export default function AdminMessagesScreen() {
     if (searchQuery.trim() === '') {
       setFilteredConversations(conversations);
     } else {
-      const filtered = conversations.filter(conversation => 
-        conversation.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        conversation.user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (conversation.last_message && conversation.last_message.toLowerCase().includes(searchQuery.toLowerCase()))
+      const filtered = conversations.filter(
+        conversation =>
+          conversation.subject
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          conversation.user_name
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          (conversation.last_message &&
+            conversation.last_message
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()))
       );
       setFilteredConversations(filtered);
     }
@@ -70,13 +102,16 @@ export default function AdminMessagesScreen() {
       }
 
       console.log('Loading conversations...');
-      const response = await fetch('http://localhost:8000/api/chat/admin/conversations', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/chat/admin/conversations`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       console.log('Conversations response status:', response.status);
       if (response.ok) {
@@ -85,7 +120,11 @@ export default function AdminMessagesScreen() {
         setConversations(data);
         setFilteredConversations(data);
       } else {
-        console.error('Failed to load conversations:', response.status, response.statusText);
+        console.error(
+          'Failed to load conversations:',
+          response.status,
+          response.statusText
+        );
         const errorText = await response.text();
         console.error('Error response:', errorText);
       }
@@ -104,13 +143,16 @@ export default function AdminMessagesScreen() {
       }
 
       console.log('Loading messages for conversation:', conversationId);
-      const response = await fetch(`http://localhost:8000/api/chat/admin/conversations/${conversationId}/messages`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/chat/admin/conversations/${conversationId}/messages`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       console.log('Messages response status:', response.status);
       if (response.ok) {
@@ -121,13 +163,21 @@ export default function AdminMessagesScreen() {
           text: msg.message,
           sender: msg.sender_type === 'user' ? 'user' : 'admin',
           timestamp: new Date(msg.created_at),
-          senderName: msg.sender_name
+          senderName: msg.sender_name,
         }));
         // Sortiere chronologisch - älteste zuerst für normale Chat-Anzeige
-        setMessages(formattedMessages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()));
+        setMessages(
+          formattedMessages.sort(
+            (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+          )
+        );
         console.log('Formatted messages:', formattedMessages.length);
       } else {
-        console.error('Failed to load messages:', response.status, response.statusText);
+        console.error(
+          'Failed to load messages:',
+          response.status,
+          response.statusText
+        );
         const errorText = await response.text();
         console.error('Error response:', errorText);
       }
@@ -145,17 +195,20 @@ export default function AdminMessagesScreen() {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:8000/api/chat/admin/reply', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: newMessage.trim(),
-          conversation_id: selectedConversation.id
-        }),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/chat/admin/reply`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: newMessage.trim(),
+            conversation_id: selectedConversation.id,
+          }),
+        }
+      );
 
       if (response.ok) {
         const responseData = await response.json();
@@ -164,11 +217,11 @@ export default function AdminMessagesScreen() {
           text: newMessage.trim(),
           sender: 'admin',
           timestamp: new Date(),
-          senderName: responseData.sender_name
+          senderName: responseData.sender_name,
         };
         setMessages(prev => [...prev, newMsg]);
         setNewMessage('');
-        
+
         // Reload conversations to update unread counts
         loadConversations();
       }
@@ -182,22 +235,18 @@ export default function AdminMessagesScreen() {
     setSelectedConversation(conversation);
     setChatModalVisible(true);
     loadMessages(conversation.id);
-    
+
     // Markiere Gespräch als gelesen wenn es ungelesene Nachrichten hat
     if (conversation.unread_count > 0) {
       // Update UI immediately before making API call
-      setConversations(prevConversations => 
-        prevConversations.map(conv => 
-          conv.id === conversation.id 
-            ? { ...conv, unread_count: 0 }
-            : conv
+      setConversations(prevConversations =>
+        prevConversations.map(conv =>
+          conv.id === conversation.id ? { ...conv, unread_count: 0 } : conv
         )
       );
-      setFilteredConversations(prevConversations => 
-        prevConversations.map(conv => 
-          conv.id === conversation.id 
-            ? { ...conv, unread_count: 0 }
-            : conv
+      setFilteredConversations(prevConversations =>
+        prevConversations.map(conv =>
+          conv.id === conversation.id ? { ...conv, unread_count: 0 } : conv
         )
       );
       markAsRead(conversation.id);
@@ -213,20 +262,29 @@ export default function AdminMessagesScreen() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgent': return '#EF4444';
-      case 'high': return '#F59E0B';
-      case 'normal': return '#10B981';
-      case 'low': return '#6B7280';
-      default: return '#6B7280';
+      case 'urgent':
+        return '#EF4444';
+      case 'high':
+        return '#F59E0B';
+      case 'normal':
+        return '#10B981';
+      case 'low':
+        return '#6B7280';
+      default:
+        return '#6B7280';
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'open': return '#10B981';
-      case 'pending': return '#F59E0B';
-      case 'closed': return '#6B7280';
-      default: return '#6B7280';
+      case 'open':
+        return '#10B981';
+      case 'pending':
+        return '#F59E0B';
+      case 'closed':
+        return '#6B7280';
+      default:
+        return '#6B7280';
     }
   };
 
@@ -245,28 +303,27 @@ export default function AdminMessagesScreen() {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch(`http://localhost:8000/api/chat/admin/conversations/${conversationId}/mark-read`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/chat/admin/conversations/${conversationId}/mark-read`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (response.ok) {
         // Update conversations immediately to reflect the change
-        setConversations(prevConversations => 
-          prevConversations.map(conv => 
-            conv.id === conversationId 
-              ? { ...conv, unread_count: 0 }
-              : conv
+        setConversations(prevConversations =>
+          prevConversations.map(conv =>
+            conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
           )
         );
-        setFilteredConversations(prevConversations => 
-          prevConversations.map(conv => 
-            conv.id === conversationId 
-              ? { ...conv, unread_count: 0 }
-              : conv
+        setFilteredConversations(prevConversations =>
+          prevConversations.map(conv =>
+            conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
           )
         );
         // Also reload to get fresh data from server
@@ -291,13 +348,16 @@ export default function AdminMessagesScreen() {
               const token = await AsyncStorage.getItem('access_token');
               if (!token) return;
 
-              const response = await fetch(`http://localhost:8000/api/chat/admin/conversations/${conversationId}`, {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                  'Content-Type': 'application/json',
-                },
-              });
+              const response = await fetch(
+                `${API_BASE_URL}/api/chat/admin/conversations/${conversationId}`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                  },
+                }
+              );
 
               if (response.ok) {
                 loadConversations();
@@ -307,8 +367,8 @@ export default function AdminMessagesScreen() {
               console.error('Error deleting conversation:', error);
               Alert.alert('Fehler', 'Gespräch konnte nicht gelöscht werden');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -340,34 +400,34 @@ export default function AdminMessagesScreen() {
   };
 
   const statsData = [
-    { 
-      title: 'Ungelesene', 
-      value: conversations.filter(c => c.unread_count > 0).length.toString(), 
+    {
+      title: 'Ungelesene',
+      value: conversations.filter(c => c.unread_count > 0).length.toString(),
       gradient: ['#ff9500', '#ff6b35'],
       icon: 'chatbubbles',
-      subtitle: 'Neue Nachrichten'
+      subtitle: 'Neue Nachrichten',
     },
-    { 
-      title: 'Gesamt', 
-      value: conversations.length.toString(), 
+    {
+      title: 'Gesamt',
+      value: conversations.length.toString(),
       gradient: ['#007aff', '#5856d6'],
       icon: 'chatbubbles-outline',
-      subtitle: 'Alle Gespräche'
-    }
+      subtitle: 'Alle Gespräche',
+    },
   ];
 
   return (
     <GestureHandlerRootView style={styles.container}>
       {/* Header */}
       <UniversalHeader isAdmin={true} />
-      
+
       {/* Main Content */}
       <View style={styles.contentContainer}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom, 100) }
+            { paddingBottom: Math.max(insets.bottom, 100) },
           ]}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -377,7 +437,9 @@ export default function AdminMessagesScreen() {
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeTitle}>Support Chat</Text>
-            <Text style={styles.welcomeSubtitle}>Verwalten Sie alle Support-Anfragen</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Verwalten Sie alle Support-Anfragen
+            </Text>
           </View>
 
           {/* Stats Row */}
@@ -405,7 +467,10 @@ export default function AdminMessagesScreen() {
 
           {/* Action Buttons */}
           <View style={styles.actionButtonsCard}>
-            <TouchableOpacity style={styles.composeButton} onPress={loadConversations}>
+            <TouchableOpacity
+              style={styles.composeButton}
+              onPress={loadConversations}
+            >
               <Ionicons name="refresh" size={20} color="white" />
               <Text style={styles.composeButtonText}>Aktualisieren</Text>
             </TouchableOpacity>
@@ -415,7 +480,12 @@ export default function AdminMessagesScreen() {
           <View style={styles.searchCard}>
             <View style={styles.searchContainer}>
               <View style={styles.searchInputContainer}>
-                <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+                <Ionicons
+                  name="search"
+                  size={20}
+                  color="#8E8E93"
+                  style={styles.searchIcon}
+                />
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Nach Benutzer oder Betreff suchen..."
@@ -426,7 +496,7 @@ export default function AdminMessagesScreen() {
                   autoCorrect={false}
                 />
                 {searchQuery.length > 0 && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={handleClearSearch}
                     style={styles.clearSearchButton}
                   >
@@ -444,28 +514,37 @@ export default function AdminMessagesScreen() {
                 {searchQuery ? 'Suchergebnisse' : 'Support-Gespräche'}
               </Text>
               <Text style={styles.messagesCount}>
-                {filteredConversations.length} {searchQuery ? 'gefunden' : 'Gespräche'}
+                {filteredConversations.length}{' '}
+                {searchQuery ? 'gefunden' : 'Gespräche'}
               </Text>
             </View>
-            
+
             {filteredConversations.length === 0 && searchQuery ? (
               <View style={styles.noResultsContainer}>
                 <Ionicons name="search" size={48} color="#C7C7CC" />
-                <Text style={styles.noResultsTitle}>Keine Gespräche gefunden</Text>
+                <Text style={styles.noResultsTitle}>
+                  Keine Gespräche gefunden
+                </Text>
                 <Text style={styles.noResultsSubtitle}>
                   Versuchen Sie einen anderen Suchbegriff
                 </Text>
               </View>
             ) : filteredConversations.length === 0 ? (
               <View style={styles.noResultsContainer}>
-                <Ionicons name="chatbubbles-outline" size={64} color="#9CA3AF" />
-                <Text style={styles.noResultsTitle}>Keine Support-Anfragen vorhanden</Text>
+                <Ionicons
+                  name="chatbubbles-outline"
+                  size={64}
+                  color="#9CA3AF"
+                />
+                <Text style={styles.noResultsTitle}>
+                  Keine Support-Anfragen vorhanden
+                </Text>
                 <Text style={styles.noResultsSubtitle}>
                   Alle neuen Nachrichten werden hier erscheinen
                 </Text>
               </View>
             ) : (
-              filteredConversations.map((conversation) => (
+              filteredConversations.map(conversation => (
                 <Swipeable
                   key={conversation.id}
                   renderLeftActions={() => renderLeftActions(conversation.id)}
@@ -476,8 +555,8 @@ export default function AdminMessagesScreen() {
                   overshootLeft={false}
                   overshootRight={false}
                 >
-                  <TouchableOpacity 
-                    style={styles.messageCard} 
+                  <TouchableOpacity
+                    style={styles.messageCard}
                     onPress={() => openChat(conversation)}
                   >
                     <View style={styles.messageContent}>
@@ -488,32 +567,72 @@ export default function AdminMessagesScreen() {
                             {conversation.user_name.charAt(0)}
                           </Text>
                         </View>
-                        
+
                         {/* Conversation Info */}
                         <View style={styles.messageInfo}>
                           <View style={styles.messageHeader}>
-                            <Text style={[styles.messageSender, conversation.unread_count > 0 && styles.unreadText]}>
+                            <Text
+                              style={[
+                                styles.messageSender,
+                                conversation.unread_count > 0 &&
+                                  styles.unreadText,
+                              ]}
+                            >
                               {conversation.user_name}
                             </Text>
                             <View style={styles.badges}>
-                              <View style={[styles.priorityBadge, { backgroundColor: getPriorityColor(conversation.priority) }]}>
-                                <Text style={styles.badgeText}>{conversation.priority}</Text>
+                              <View
+                                style={[
+                                  styles.priorityBadge,
+                                  {
+                                    backgroundColor: getPriorityColor(
+                                      conversation.priority
+                                    ),
+                                  },
+                                ]}
+                              >
+                                <Text style={styles.badgeText}>
+                                  {conversation.priority}
+                                </Text>
                               </View>
-                              <View style={[styles.statusBadge, { backgroundColor: getStatusColor(conversation.status) }]}>
-                                <Text style={styles.badgeText}>{conversation.status}</Text>
+                              <View
+                                style={[
+                                  styles.statusBadge,
+                                  {
+                                    backgroundColor: getStatusColor(
+                                      conversation.status
+                                    ),
+                                  },
+                                ]}
+                              >
+                                <Text style={styles.badgeText}>
+                                  {conversation.status}
+                                </Text>
                               </View>
                             </View>
                           </View>
-                          <Text style={[styles.messageSubject, conversation.unread_count > 0 && styles.unreadText]} numberOfLines={1}>
+                          <Text
+                            style={[
+                              styles.messageSubject,
+                              conversation.unread_count > 0 &&
+                                styles.unreadText,
+                            ]}
+                            numberOfLines={1}
+                          >
                             {conversation.subject}
                           </Text>
                           {conversation.last_message && (
-                            <Text style={styles.messagePreview} numberOfLines={2}>
+                            <Text
+                              style={styles.messagePreview}
+                              numberOfLines={2}
+                            >
                               {conversation.last_message}
                             </Text>
                           )}
                           <Text style={styles.messageTimestamp}>
-                            {new Date(conversation.last_message_at).toLocaleString('de-DE')}
+                            {new Date(
+                              conversation.last_message_at
+                            ).toLocaleString('de-DE')}
                           </Text>
                         </View>
                       </View>
@@ -522,10 +641,16 @@ export default function AdminMessagesScreen() {
                       <View style={styles.messageRight}>
                         {conversation.unread_count > 0 && (
                           <View style={styles.unreadBadge}>
-                            <Text style={styles.unreadBadgeText}>{conversation.unread_count}</Text>
+                            <Text style={styles.unreadBadgeText}>
+                              {conversation.unread_count}
+                            </Text>
                           </View>
                         )}
-                        <Ionicons name="chevron-forward" size={20} color="#c7c7cc" />
+                        <Ionicons
+                          name="chevron-forward"
+                          size={20}
+                          color="#c7c7cc"
+                        />
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -554,7 +679,10 @@ export default function AdminMessagesScreen() {
                   {selectedConversation?.subject}
                 </Text>
               </View>
-              <TouchableOpacity onPress={closeChat} style={styles.chatCloseButton}>
+              <TouchableOpacity
+                onPress={closeChat}
+                style={styles.chatCloseButton}
+              >
                 <Ionicons name="close" size={24} color="#6B7280" />
               </TouchableOpacity>
             </View>
@@ -568,34 +696,51 @@ export default function AdminMessagesScreen() {
               ) : (
                 <FlatList
                   data={messages}
-                  keyExtractor={(item) => item.id}
+                  keyExtractor={item => item.id}
                   style={styles.messagesList}
                   inverted={false}
                   renderItem={({ item }) => (
-                    <View style={[
-                      styles.messageItem,
-                      item.sender === 'admin' ? styles.adminMessage : styles.userMessage
-                    ]}>
-                      <View style={[
-                        styles.messageBubble,
-                        item.sender === 'admin' ? styles.adminBubble : styles.userBubble
-                      ]}>
-                        <Text style={[
-                          styles.messageText,
-                          item.sender === 'admin' ? styles.adminMessageText : styles.userMessageText
-                        ]}>
+                    <View
+                      style={[
+                        styles.messageItem,
+                        item.sender === 'admin'
+                          ? styles.adminMessage
+                          : styles.userMessage,
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.messageBubble,
+                          item.sender === 'admin'
+                            ? styles.adminBubble
+                            : styles.userBubble,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.messageText,
+                            item.sender === 'admin'
+                              ? styles.adminMessageText
+                              : styles.userMessageText,
+                          ]}
+                        >
                           {item.text}
                         </Text>
-                        <Text style={[
-                          styles.messageTime,
-                          item.sender === 'admin' ? styles.adminMessageTime : styles.userMessageTime
-                        ]}>
-                          {item.timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                        <Text
+                          style={[
+                            styles.messageTime,
+                            item.sender === 'admin'
+                              ? styles.adminMessageTime
+                              : styles.userMessageTime,
+                          ]}
+                        >
+                          {item.timestamp.toLocaleTimeString('de-DE', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </Text>
                       </View>
-                      <Text style={styles.senderName}>
-                        {item.senderName}
-                      </Text>
+                      <Text style={styles.senderName}>{item.senderName}</Text>
                     </View>
                   )}
                 />
@@ -618,14 +763,17 @@ export default function AdminMessagesScreen() {
                   maxLength={500}
                 />
                 <TouchableOpacity
-                  style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+                  style={[
+                    styles.sendButton,
+                    !newMessage.trim() && styles.sendButtonDisabled,
+                  ]}
                   onPress={sendReply}
                   disabled={!newMessage.trim()}
                 >
-                  <Ionicons 
-                    name="send" 
-                    size={20} 
-                    color={newMessage.trim() ? "#FFFFFF" : "#9CA3AF"} 
+                  <Ionicons
+                    name="send"
+                    size={20}
+                    color={newMessage.trim() ? '#FFFFFF' : '#9CA3AF'}
                   />
                 </TouchableOpacity>
               </View>
@@ -652,7 +800,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  
+
   // Welcome Section
   welcomeSection: {
     marginBottom: 32,

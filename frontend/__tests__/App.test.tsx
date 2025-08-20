@@ -12,4 +12,4 @@ describe('App Tests', () => {
     const text = 'Hello World';
     expect(text.toUpperCase()).toBe('HELLO WORLD');
   });
-}); 
+});

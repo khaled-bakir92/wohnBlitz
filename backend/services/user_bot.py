@@ -2,9 +2,9 @@ import asyncio
 import json
 import logging
 import random
-import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
+
 
 from database.database import SessionLocal
 from models.bewerbung import Bewerbung, BewerbungsStatus
@@ -12,7 +12,7 @@ from models.bot_status import BotLog
 from models.user import User
 from services.immobilien_bot_manager import BotStatus
 from services.immobilien_crawler import ImmobilienCrawler
-from sqlalchemy.orm import Session
+from services.email_service import email_service
 
 
 class UserBot:
@@ -66,6 +66,11 @@ class UserBot:
                     "plz": "",
                     "ort": "Berlin",
                     "telefon": "",
+                    "wbs_vorhanden": "0",
+                    "wbs_gueltig_bis": "",
+                    "wbs_zimmeranzahl": "2",
+                    "einkommensgrenze": "140",
+                    "wbs_besonderer_wohnbedarf": "0",
                 }
 
             self.logger.info(f"User-Konfiguration für {self.user_id} geladen")
@@ -88,6 +93,11 @@ class UserBot:
                 "plz": "",
                 "ort": "Berlin",
                 "telefon": "",
+                "wbs_vorhanden": "0",
+                "wbs_gueltig_bis": "",
+                "wbs_zimmeranzahl": "2",
+                "einkommensgrenze": "140",
+                "wbs_besonderer_wohnbedarf": "0",
             }
 
     def setup_crawler(self):
@@ -152,7 +162,9 @@ class UserBot:
 
                         self.bot_manager.update_metrics(
                             self.user_id,
-                            current_action=f"Bearbeite Angebot: {listing.get('titel', 'Unbekannt')}",
+                            current_action=f"Bearbeite Angebot: {
+                                listing.get(
+                                    'titel', 'Unbekannt')}",
                         )
 
                         success = await self.process_listing(listing)
@@ -170,7 +182,8 @@ class UserBot:
                             pause_time = random.uniform(5, 15)
                             self.bot_manager.update_metrics(
                                 self.user_id,
-                                current_action=f"Pause für {pause_time:.1f} Sekunden...",
+                                current_action=f"Pause für {
+                                    pause_time:.1f} Sekunden...",
                             )
                             await asyncio.sleep(pause_time)
 
@@ -211,7 +224,8 @@ class UserBot:
                         )
                     except Exception as restart_error:
                         self.logger.error(
-                            f"Fehler beim Neustart für User {self.user_id}: {restart_error}"
+                            f"Fehler beim Neustart für User {
+                                self.user_id}: {restart_error}"
                         )
                         break
 
@@ -262,13 +276,36 @@ class UserBot:
     async def process_listing(self, listing: Dict[str, Any]) -> bool:
         """Verarbeitet ein neues Angebot"""
         try:
-            # Zunächst Bewerbung in Datenbank als PENDING speichern
             db = SessionLocal()
-
+            
+            # Prüfen, ob bereits eine Bewerbung für diese Wohnung existiert
+            wohnungsname = listing.get("titel", "Unbekannt")
+            adresse = listing.get("adresse", "Unbekannt")
+            
+            existing_bewerbung = db.query(Bewerbung).filter(
+                Bewerbung.user_id == self.user_id,
+                Bewerbung.wohnungsname == wohnungsname,
+                Bewerbung.adresse == adresse
+            ).first()
+            
+            if existing_bewerbung:
+                self.logger.info(
+                    f"Bewerbung bereits vorhanden für User {self.user_id}: {wohnungsname} - {adresse}"
+                )
+                self.log_to_database(
+                    "INFO",
+                    f"Doppelte Bewerbung übersprungen: {wohnungsname}",
+                    "skip_duplicate",
+                    listing.get("id"),
+                )
+                db.close()
+                return False
+            
+            # Neue Bewerbung in Datenbank als PENDING speichern
             bewerbung = Bewerbung(
                 user_id=self.user_id,
-                wohnungsname=listing.get("titel", "Unbekannt"),
-                adresse=listing.get("adresse", "Unbekannt"),
+                wohnungsname=wohnungsname,
+                adresse=adresse,
                 preis=listing.get("warmmiete"),
                 anzahl_zimmer=listing.get("zimmer"),
                 status=BewerbungsStatus.PENDING,
@@ -298,6 +335,31 @@ class UserBot:
                         "apply",
                         listing.get("id"),
                     )
+                    
+                    # Bestätigungsmail senden
+                    try:
+                        email_sent = email_service.send_application_confirmation(
+                            user=self.user,
+                            bewerbung=bewerbung,
+                            listing_details=listing
+                        )
+                        if email_sent:
+                            self.log_to_database(
+                                "INFO",
+                                f"Bestätigungsmail gesendet für: {listing.get('titel')}",
+                                "email_sent",
+                                listing.get("id"),
+                            )
+                        else:
+                            self.log_to_database(
+                                "WARNING",
+                                f"Bestätigungsmail konnte nicht gesendet werden für: {listing.get('titel')}",
+                                "email_failed",
+                                listing.get("id"),
+                            )
+                    except Exception as email_error:
+                        self.logger.warning(f"Fehler beim Senden der Bestätigungsmail: {email_error}")
+                        
                 else:
                     bewerbung.status = BewerbungsStatus.REJECTED
                     self.log_to_database(
@@ -306,12 +368,25 @@ class UserBot:
                         "apply",
                         listing.get("id"),
                     )
+                    
+                    # Fehler-E-Mail senden
+                    try:
+                        email_service.send_application_error_notification(
+                            user=self.user,
+                            bewerbung=bewerbung,
+                            error_message="Bewerbungsformular konnte nicht ausgefüllt werden"
+                        )
+                    except Exception as email_error:
+                        self.logger.warning(f"Fehler beim Senden der Fehler-E-Mail: {email_error}")
 
                 db.commit()
                 db.close()
 
                 self.logger.info(
-                    f"Bewerbung für User {self.user_id} verarbeitet: {listing.get('titel')} - Status: {bewerbung.status.value}"
+                    f"Bewerbung für User {
+                        self.user_id} verarbeitet: {
+                        listing.get('titel')} - Status: {
+                        bewerbung.status.value}"
                 )
                 return form_success
             else:

@@ -1,23 +1,22 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict
 
-from core.auth import get_current_active_user
-from core.schemas import Statistik, StatistikCreate
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from core.auth import get_current_active_user, get_current_user_with_profile
 from database.database import get_db
 from models.bewerbung import Bewerbung as BewerbungModel
 from models.bewerbung import BewerbungsStatus
 from models.statistik import Statistik as StatistikModel
 from models.user import User
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import func
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/statistik", tags=["statistik"])
 
 
 @router.get("/")
 def get_user_statistik(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user_with_profile)
 ) -> Dict[str, Any]:
     # Aktuelle Statistik aus Datenbank holen oder erstellen
     statistik = (
@@ -93,7 +92,7 @@ def get_user_statistik(
 
 @router.get("/dashboard")
 def get_dashboard_statistik(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_active_user)
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user_with_profile)
 ) -> Dict[str, Any]:
     # Erweiterte Dashboard-Statistiken
 

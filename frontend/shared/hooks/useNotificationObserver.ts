@@ -13,7 +13,7 @@ export function useNotificationObserver() {
 
     function redirect(notification: Notifications.Notification) {
       const data = notification.request.content.data;
-      
+
       // Handle different notification types
       if (data?.type === 'chat_message' && data?.conversation_id) {
         // Navigate to specific chat conversation
@@ -47,7 +47,11 @@ export function useNotificationObserver() {
         if (initialUrl && isMounted) {
           console.log('App opened with URL:', initialUrl);
           // Parse URL and navigate if it's a notification URL
-          if (initialUrl.includes('notification') || initialUrl.includes('chat') || initialUrl.includes('apartment')) {
+          if (
+            initialUrl.includes('notification') ||
+            initialUrl.includes('chat') ||
+            initialUrl.includes('apartment')
+          ) {
             try {
               router.push(initialUrl.replace(/.*\/\/[^\/]+/, '')); // Remove scheme and host
             } catch (error) {
@@ -63,15 +67,20 @@ export function useNotificationObserver() {
     checkInitialNotification();
 
     // Listen for notification responses while app is running
-    const notificationSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('Notification response received:', response);
-      redirect(response.notification);
-    });
+    const notificationSubscription =
+      Notifications.addNotificationResponseReceivedListener(response => {
+        console.log('Notification response received:', response);
+        redirect(response.notification);
+      });
 
     // Listen for incoming deep links while app is running
     const linkingSubscription = Linking.addEventListener('url', ({ url }) => {
       console.log('Deep link received:', url);
-      if (url.includes('notification') || url.includes('chat') || url.includes('apartment')) {
+      if (
+        url.includes('notification') ||
+        url.includes('chat') ||
+        url.includes('apartment')
+      ) {
         try {
           router.push(url.replace(/.*\/\/[^\/]+/, '')); // Remove scheme and host
         } catch (error) {

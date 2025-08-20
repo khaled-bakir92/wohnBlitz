@@ -57,7 +57,12 @@ class WBMBot:
             "plz": "10315",
             "ort": "Berlin",
             "email": "revana.khibo94@gmail.com",
-            "telefon": "01752555047"
+            "telefon": "01752555047",
+            "wbs_vorhanden": "0",  # "1" = ja, "0" = nein
+            "wbs_gueltig_bis": "",  # Format: DD.MM.YYYY (nur wenn WBS vorhanden)
+            "wbs_zimmeranzahl": "2",  # 1-7 (nur wenn WBS vorhanden)
+            "einkommensgrenze": "140",  # 100, 140, 160, 180, 220 (nur wenn WBS vorhanden)
+            "wbs_besonderer_wohnbedarf": "0"  # "1" = ja, "0" = nein (nur wenn WBS vorhanden)
         }
         
         # Kontaktdaten für E-Mail-Benachrichtigungen - HIER ANPASSEN
@@ -484,6 +489,50 @@ class WBMBot:
                 telefon_field = self.driver.find_element(By.ID, "powermail_field_telefon")
                 telefon_field.clear()
                 telefon_field.send_keys(self.user_data["telefon"])
+                
+                # WBS-Felder ausfüllen
+                try:
+                    # WBS vorhanden Radio-Button
+                    wbs_vorhanden = self.user_data.get("wbs_vorhanden", "0")
+                    if wbs_vorhanden == "1":
+                        wbs_radio_ja = self.driver.find_element(By.ID, "powermail_field_wbsvorhanden_1")
+                        self.driver.execute_script("arguments[0].click();", wbs_radio_ja)
+                        logging.info("WBS vorhanden: Ja ausgewählt")
+                        
+                        # WBS gültig bis (nur wenn WBS vorhanden)
+                        wbs_gueltig_bis = self.user_data.get("wbs_gueltig_bis")
+                        if wbs_gueltig_bis:
+                            wbs_datum_field = self.driver.find_element(By.ID, "powermail_field_wbsgueltigbis")
+                            wbs_datum_field.clear()
+                            wbs_datum_field.send_keys(wbs_gueltig_bis)
+                            logging.info(f"WBS gültig bis: {wbs_gueltig_bis}")
+                        
+                        # WBS Zimmeranzahl
+                        wbs_zimmeranzahl = self.user_data.get("wbs_zimmeranzahl", "2")
+                        wbs_zimmer_select = Select(self.driver.find_element(By.ID, "powermail_field_wbszimmeranzahl"))
+                        wbs_zimmer_select.select_by_value(wbs_zimmeranzahl)
+                        logging.info(f"WBS Zimmeranzahl: {wbs_zimmeranzahl}")
+                        
+                        # Einkommensgrenze
+                        einkommensgrenze = self.user_data.get("einkommensgrenze", "140")
+                        einkommens_select = Select(self.driver.find_element(By.ID, "powermail_field_einkommensgrenzenacheinkommensbescheinigung9"))
+                        einkommens_select.select_by_value(einkommensgrenze)
+                        logging.info(f"Einkommensgrenze: WBS {einkommensgrenze}")
+                        
+                        # WBS mit besonderem Wohnbedarf (optional)
+                        if self.user_data.get("wbs_besonderer_wohnbedarf") == "1":
+                            besonderer_bedarf_checkbox = self.driver.find_element(By.ID, "powermail_field_wbsmitbesonderemwohnbedarf_1")
+                            self.driver.execute_script("arguments[0].click();", besonderer_bedarf_checkbox)
+                            logging.info("WBS mit besonderem Wohnbedarf: aktiviert")
+                    else:
+                        # WBS nicht vorhanden
+                        wbs_radio_nein = self.driver.find_element(By.ID, "powermail_field_wbsvorhanden_2")
+                        self.driver.execute_script("arguments[0].click();", wbs_radio_nein)
+                        logging.info("WBS vorhanden: Nein ausgewählt")
+                        
+                except (NoSuchElementException, ElementClickInterceptedException) as e:
+                    logging.warning(f"Problem beim Ausfüllen der WBS-Felder: {e}")
+                    # WBS-Felder sind optional, daher nicht abbrechen
                 
                 # Datenschutzhinweis akzeptieren
                 try:

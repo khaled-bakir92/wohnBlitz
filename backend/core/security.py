@@ -48,21 +48,21 @@ def verify_token(token: str, token_type: str = "access"):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         token_type_from_payload: str = payload.get("type")
-        
+
         if username is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         if token_type_from_payload != token_type:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail=f"Invalid token type. Expected {token_type}",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         return username
     except JWTError:
         raise HTTPException(

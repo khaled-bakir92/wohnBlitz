@@ -1,11 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  Easing,
-  Dimensions,
-} from 'react-native';
+import { View, StyleSheet, Animated, Easing, Dimensions } from 'react-native';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -72,9 +66,7 @@ export default function LaunchScreen() {
 
   const animatedStyle = {
     opacity: fadeAnim,
-    transform: [
-      { scale: scaleAnim },
-    ],
+    transform: [{ scale: scaleAnim }],
   };
 
   return (
@@ -90,11 +82,9 @@ export default function LaunchScreen() {
             contentFit="contain"
           />
         </Animated.View>
-        
+
         <Animated.View style={[styles.textContainer, animatedStyle]}>
-          <Animated.Text style={styles.appName}>
-            Wohnblitzer
-          </Animated.Text>
+          <Animated.Text style={styles.appName}>Wohnblitzer</Animated.Text>
           <Animated.Text style={styles.tagline}>
             Dein Immobilien-Assistent
           </Animated.Text>
@@ -146,4 +136,4 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     letterSpacing: 0.3,
   },
-}); 
+});

@@ -1,12 +1,12 @@
 import asyncio
 import atexit
-import logging
 import signal
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+
 from core.logging_config import get_logger
 from services.immobilien_bot_manager import bot_manager
-from fastapi import FastAPI
 
 logger = get_logger("lifecycle")
 

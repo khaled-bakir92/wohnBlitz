@@ -1,6 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, List
 
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+
 from core.auth import get_current_admin_user
 from core.logging_config import bot_metrics
 from database.database import get_db
@@ -8,9 +12,6 @@ from models.bewerbung import Bewerbung, BewerbungsStatus
 from models.bot_status import BotLog
 from models.user import User
 from services.immobilien_bot_manager import bot_manager
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/monitoring", tags=["monitoring"])
 
@@ -242,7 +243,7 @@ def get_system_alerts(
                     .filter(Bewerbung.bewerbungsdatum >= last_week)
                     .distinct()
                 ),
-                User.is_active == True,
+                User.is_active.is_(True),
             )
             .count()
         )

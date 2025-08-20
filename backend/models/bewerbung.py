@@ -1,9 +1,10 @@
 import enum
 
-from database.database import Base
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+
+from database.database import Base
 
 
 class BewerbungsStatus(enum.Enum):

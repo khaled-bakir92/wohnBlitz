@@ -1,10 +1,7 @@
 import asyncio
-import json
 import logging
 import os
-import random
 import time
-from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from selenium import webdriver
@@ -53,7 +50,9 @@ class ImmobilienCrawler:
         chrome_options.add_argument("--disable-notifications")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument(
-            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
+            "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/96.0.4664.110 Safari/537.36"
         )
 
         try:
@@ -144,7 +143,8 @@ class ImmobilienCrawler:
                             new_listings.append(listing_data)
                             self.known_listings.add(listing_data["id"])
                             self.logger.info(
-                                f"Neues gefiltertes Angebot gefunden: {listing_data['titel']} ({listing_data['id']})"
+                                f"Neues gefiltertes Angebot gefunden: {listing_data['titel']} "
+                                f"({listing_data['id']})"
                             )
 
                 except Exception as e:
@@ -155,7 +155,8 @@ class ImmobilienCrawler:
 
         except TimeoutException:
             self.logger.error(
-                "Timeout beim Laden der Seite. Möglicherweise ist die Internetverbindung langsam oder die Seite nicht verfügbar."
+                "Timeout beim Laden der Seite. Möglicherweise ist die "
+                "Internetverbindung langsam oder die Seite nicht verfügbar."
             )
             return []
         except Exception as e:
@@ -176,7 +177,7 @@ class ImmobilienCrawler:
                 listing_id = listing.get_attribute("data-id")
                 if not listing_id:
                     listing_id = listing.get_attribute("data-uid")
-            except:
+            except BaseException:
                 base_id = (
                     listing_url.split("/")[-2]
                     if listing_url.split("/")[-1] == ""
@@ -381,6 +382,44 @@ class ImmobilienCrawler:
                     )
                     telefon_field.clear()
                     telefon_field.send_keys(self.user_data["telefon"])
+
+                # WBS-Felder ausfüllen
+                try:
+                    # WBS vorhanden Radio-Button
+                    wbs_vorhanden = self.user_data.get("wbs_vorhanden", "0")
+                    if wbs_vorhanden == "1":
+                        wbs_radio_ja = self.driver.find_element(By.ID, "powermail_field_wbsvorhanden_1")
+                        self.driver.execute_script("arguments[0].click();", wbs_radio_ja)
+                        
+                        # WBS gültig bis (nur wenn WBS vorhanden)
+                        wbs_gueltig_bis = self.user_data.get("wbs_gueltig_bis")
+                        if wbs_gueltig_bis:
+                            wbs_datum_field = self.driver.find_element(By.ID, "powermail_field_wbsgueltigbis")
+                            wbs_datum_field.clear()
+                            wbs_datum_field.send_keys(wbs_gueltig_bis)
+                        
+                        # WBS Zimmeranzahl
+                        wbs_zimmeranzahl = self.user_data.get("wbs_zimmeranzahl", "2")
+                        wbs_zimmer_select = Select(self.driver.find_element(By.ID, "powermail_field_wbszimmeranzahl"))
+                        wbs_zimmer_select.select_by_value(wbs_zimmeranzahl)
+                        
+                        # Einkommensgrenze
+                        einkommensgrenze = self.user_data.get("einkommensgrenze", "140")
+                        einkommens_select = Select(self.driver.find_element(By.ID, "powermail_field_einkommensgrenzenacheinkommensbescheinigung9"))
+                        einkommens_select.select_by_value(einkommensgrenze)
+                        
+                        # WBS mit besonderem Wohnbedarf (optional)
+                        if self.user_data.get("wbs_besonderer_wohnbedarf") == "1":
+                            besonderer_bedarf_checkbox = self.driver.find_element(By.ID, "powermail_field_wbsmitbesonderemwohnbedarf_1")
+                            self.driver.execute_script("arguments[0].click();", besonderer_bedarf_checkbox)
+                    else:
+                        # WBS nicht vorhanden
+                        wbs_radio_nein = self.driver.find_element(By.ID, "powermail_field_wbsvorhanden_2")
+                        self.driver.execute_script("arguments[0].click();", wbs_radio_nein)
+                        
+                except (NoSuchElementException, ElementClickInterceptedException) as e:
+                    self.logger.warning(f"Problem beim Ausfüllen der WBS-Felder: {e}")
+                    # WBS-Felder sind optional, daher nicht abbrechen
 
                 # Datenschutzhinweis akzeptieren
                 try:

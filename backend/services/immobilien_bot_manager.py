@@ -1,15 +1,12 @@
 import asyncio
-import json
 import logging
 import threading
-import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
 from database.database import SessionLocal
-from models.bewerbung import Bewerbung, BewerbungsStatus
 from models.user import User
 
 

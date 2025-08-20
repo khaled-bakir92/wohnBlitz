@@ -1,13 +1,14 @@
 from typing import List, Optional
 
-from core.auth import get_current_active_user
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+
+from core.auth import get_current_active_user, get_current_user_with_profile
 from core.schemas import Bewerbung, BewerbungCreate
 from database.database import get_db
 from models.bewerbung import Bewerbung as BewerbungModel
 from models.bewerbung import BewerbungsStatus
 from models.user import User
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/bewerbungen", tags=["bewerbungen"])
 
@@ -18,7 +19,7 @@ def get_bewerbungen(
     limit: int = Query(100, ge=1, le=1000),
     status: Optional[str] = Query(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user_with_profile),
 ):
     query = db.query(BewerbungModel).filter(BewerbungModel.user_id == current_user.id)
 

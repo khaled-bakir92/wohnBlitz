@@ -1,5 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert, Animated, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  Alert,
+  Animated,
+  Platform,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -17,15 +26,16 @@ interface AdminHeaderProps {
   onNotificationPress?: () => void;
 }
 
-export default function AdminHeader({ 
-  title = "Admin Dashboard",
-  onNotificationPress
+export default function AdminHeader({
+  title = 'Admin Dashboard',
+  onNotificationPress,
 }: AdminHeaderProps) {
   const insets = useSafeAreaInsets();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [menuAnimation] = useState(new Animated.Value(0));
   const notificationModalRef = useRef<NotificationModalRef>(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } =
+    useNotifications();
 
   const toggleProfileMenu = () => {
     if (showProfileMenu) {
@@ -66,12 +76,15 @@ export default function AdminHeader({
                 'user_email',
                 'stay_logged_in',
                 'stored_email',
-                'stored_password'
+                'stored_password',
               ]);
               router.replace('/login');
             } catch (error) {
               console.error('Admin logout error:', error);
-              Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten.');
+              Alert.alert(
+                'Fehler',
+                'Beim Abmelden ist ein Fehler aufgetreten.'
+              );
             }
           },
         },
@@ -101,10 +114,10 @@ export default function AdminHeader({
 
   const handleNotificationItemPress = (notification: any) => {
     console.log('Admin notification item pressed:', notification);
-    
+
     // Close the notification modal first
     notificationModalRef.current?.dismiss();
-    
+
     // Navigate to admin chat with the conversation ID
     if (notification.id) {
       router.push(`/admin/chat/${notification.id}`);
@@ -113,15 +126,15 @@ export default function AdminHeader({
 
   return (
     <>
-      <StatusBar 
-        backgroundColor="transparent" 
-        barStyle="dark-content" 
+      <StatusBar
+        backgroundColor="transparent"
+        barStyle="dark-content"
         translucent={true}
       />
       {showProfileMenu && (
-        <TouchableOpacity 
-          style={styles.overlay} 
-          activeOpacity={1} 
+        <TouchableOpacity
+          style={styles.overlay}
+          activeOpacity={1}
           onPress={() => setShowProfileMenu(false)}
         />
       )}
@@ -153,15 +166,15 @@ export default function AdminHeader({
 
             {/* Right side - Icons */}
             <View style={styles.rightSection}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.iconButton}
                 onPress={handleNotificationPress}
               >
                 <View style={styles.notificationContainer}>
-                  <MaterialIcons 
-                    name="notifications-none" 
-                    size={24} 
-                    color="#374151" 
+                  <MaterialIcons
+                    name="notifications-none"
+                    size={24}
+                    color="#374151"
                   />
                   {unreadCount > 0 && (
                     <View style={styles.notificationBadge}>
@@ -172,15 +185,15 @@ export default function AdminHeader({
                   )}
                 </View>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.iconButton}
                 onPress={toggleProfileMenu}
               >
-                <MaterialIcons 
-                  name="account-circle" 
-                  size={24} 
-                  color="#374151" 
+                <MaterialIcons
+                  name="account-circle"
+                  size={24}
+                  color="#374151"
                 />
               </TouchableOpacity>
             </View>
@@ -211,43 +224,70 @@ export default function AdminHeader({
               ]}
             >
               <Surface style={styles.menuSurface}>
-                <TouchableOpacity style={styles.menuItem} onPress={handleSettings}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleSettings}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
-                      <MaterialIcons name="settings" size={20} color="#6b7280" />
+                      <MaterialIcons
+                        name="settings"
+                        size={20}
+                        color="#6b7280"
+                      />
                     </View>
                     <Text style={styles.menuItemText}>Admin Einstellungen</Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
-                
-                <TouchableOpacity style={styles.menuItem} onPress={handleSupport}>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleSupport}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
                       <MaterialIcons name="help" size={20} color="#6b7280" />
                     </View>
                     <Text style={styles.menuItemText}>Admin Support</Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
-                
+
                 <View style={styles.menuDivider} />
-                
-                <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleLogout}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
                       <MaterialIcons name="logout" size={20} color="#ef4444" />
                     </View>
-                    <Text style={[styles.menuItemText, { color: '#ef4444' }]}>Abmelden</Text>
+                    <Text style={[styles.menuItemText, { color: '#ef4444' }]}>
+                      Abmelden
+                    </Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
               </Surface>
             </Animated.View>
           )}
         </View>
       </View>
-      
+
       <NotificationModal
         ref={notificationModalRef}
         notifications={notifications}

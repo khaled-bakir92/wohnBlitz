@@ -32,7 +32,12 @@ const WohnBlitzLogo = () => (
   </View>
 );
 
-const DropdownPicker = ({ value, onValueChange, options, placeholder }: {
+const DropdownPicker = ({
+  value,
+  onValueChange,
+  options,
+  placeholder,
+}: {
   value: string;
   onValueChange: (value: string) => void;
   options: string[];
@@ -55,7 +60,7 @@ const DropdownPicker = ({ value, onValueChange, options, placeholder }: {
           color="#9CA3AF"
         />
       </TouchableOpacity>
-      
+
       {isOpen && (
         <View style={styles.dropdownList}>
           {options.map((option, index) => (
@@ -144,7 +149,7 @@ export default function ProfileScreen({ onComplete }: ProfileFormProps = {}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
@@ -217,8 +222,11 @@ export default function ProfileScreen({ onComplete }: ProfileFormProps = {}) {
               />
             </View>
 
-            <TouchableOpacity 
-              style={[styles.weiterButton, isLoading && styles.weiterButtonDisabled]} 
+            <TouchableOpacity
+              style={[
+                styles.weiterButton,
+                isLoading && styles.weiterButtonDisabled,
+              ]}
               onPress={handleWeiter}
               disabled={isLoading}
             >

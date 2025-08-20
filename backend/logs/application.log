@@ -379,3 +379,115 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2025-07-15 21:56:12,733 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
 2025-07-15 22:18:07,849 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
 2025-07-15 22:18:07,850 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 21:21:35,590 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-08 21:21:35,591 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 21:46:04,533 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-08 21:46:04,534 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 22:02:49,511 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-08 22:02:49,511 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 22:03:41,591 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-08 22:03:41,592 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 22:07:27,794 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-08 22:07:27,795 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 22:08:04,574 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-08 22:23:39,002 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-08 22:23:39,002 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-08 22:28:09,680 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-10 20:59:00,552 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-10 20:59:00,553 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-10 21:00:24,055 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-10 21:00:24,055 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-10 21:01:07,126 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-10 21:01:07,126 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-11 16:14:54,807 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-12 22:13:52,874 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-12 22:13:52,874 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-12 22:21:11,900 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-12 22:36:35,111 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-12 22:36:35,111 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-12 22:40:26,346 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-12 22:40:26,346 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-12 22:41:25,713 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-13 15:41:02,058 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-13 15:41:02,059 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-13 15:42:42,120 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-13 15:46:53,762 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-13 15:46:53,762 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-13 15:46:53,762 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-13 15:46:53,763 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-13 15:46:53,763 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-13 15:48:23,515 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-13 15:48:23,516 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-13 15:48:23,516 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-13 15:48:35,573 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-13 15:48:35,588 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 2 Angebote
+2025-08-13 15:48:35,780 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: 2-Zimmer Dachgeschoßwohnung in Spandau (60-7903/38/576)
+2025-08-13 15:48:35,780 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-13 15:48:35,796 - services.immobilien_crawler.Crawler.8 - INFO - Bearbeite Angebot für User 8: 2-Zimmer Dachgeschoßwohnung in Spandau (https://www.wbm.de/wohnungen-berlin/angebote/details/2-zimmer-dachgeschosswohnung-in-spandau/)
+2025-08-13 15:48:44,919 - services.immobilien_crawler.Crawler.8 - INFO - Formular für User 8 erfolgreich abgesendet: 2-Zimmer Dachgeschoßwohnung in Spandau
+2025-08-13 15:48:44,923 - services.user_bot.UserBot.8 - ERROR - Fehler beim Verarbeiten der Bewerbung für User 8: Instance <Bewerbung at 0x1090a00b0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2025-08-13 15:50:21,225 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-13 15:50:21,346 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-13 15:50:21,346 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-13 15:50:21,346 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-13 15:50:25,736 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-13 15:50:25,736 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-13 15:50:25,737 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-13 15:50:25,737 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-13 15:50:25,737 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-13 15:50:49,229 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-13 15:50:49,230 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-13 15:50:49,230 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-13 15:50:59,805 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-13 15:50:59,819 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 2 Angebote
+2025-08-13 15:50:59,999 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: 2-Zimmer Dachgeschoßwohnung in Spandau (60-7903/38/576)
+2025-08-13 15:50:59,999 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-13 15:51:00,005 - services.immobilien_crawler.Crawler.8 - INFO - Bearbeite Angebot für User 8: 2-Zimmer Dachgeschoßwohnung in Spandau (https://www.wbm.de/wohnungen-berlin/angebote/details/2-zimmer-dachgeschosswohnung-in-spandau/)
+2025-08-13 15:51:09,129 - services.immobilien_crawler.Crawler.8 - INFO - Formular für User 8 erfolgreich abgesendet: 2-Zimmer Dachgeschoßwohnung in Spandau
+2025-08-13 15:51:09,137 - services.user_bot.UserBot.8 - ERROR - Fehler beim Verarbeiten der Bewerbung für User 8: Instance <Bewerbung at 0x1092079b0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2025-08-13 15:55:34,358 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-13 15:55:34,477 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-13 15:55:34,477 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-13 15:55:34,477 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-13 16:03:52,599 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-13 16:06:21,945 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-13 16:40:41,089 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-13 16:41:04,796 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-14 16:08:04,946 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-14 16:08:04,947 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-14 16:09:03,299 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.

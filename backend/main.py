@@ -1,24 +1,22 @@
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from core.logging_config import get_logger
 from database.database import engine
-from models import bewerbung, bot_status, nachricht, statistik, user, chat
+from models import chat, user
+from routers import admin, auth, bewerbungen, bot
+from routers import chat as chat_router
 from routers import (
-    admin,
-    auth,
-    bewerbungen,
-    bot,
     filter,
     monitoring,
     nachrichten,
+    push_notifications,
     statistiken,
     support,
-    chat as chat_router,
-    push_notifications,
 )
 from services.bot_maintenance import maintenance_service
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 logger = get_logger("main")
 

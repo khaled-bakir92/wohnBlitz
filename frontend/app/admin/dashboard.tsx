@@ -1,22 +1,28 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity, Dimensions } from 'react-native';
-import { 
-  SafeAreaProvider, 
-  SafeAreaView, 
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
   useSafeAreaInsets,
-  initialWindowMetrics 
+  initialWindowMetrics,
 } from 'react-native-safe-area-context';
-import { 
-  PaperProvider, 
-  MD3LightTheme, 
+import {
+  PaperProvider,
+  MD3LightTheme,
   MD3DarkTheme,
   Card,
   Surface,
   Text,
   IconButton,
   useTheme,
-  Badge
+  Badge,
 } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -24,42 +30,48 @@ import { LinearGradient } from 'expo-linear-gradient';
 import UniversalHeader from '@/shared/UniversalHeader';
 
 // Admin Dashboard Component
-function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void; isDarkMode: boolean }) {
+function AdminDashboardContent({
+  toggleTheme,
+  isDarkMode,
+}: {
+  toggleTheme: () => void;
+  isDarkMode: boolean;
+}) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
-  
+
   const statsData = [
-    { 
-      title: 'Aktive Benutzer', 
-      value: '142', 
+    {
+      title: 'Aktive Benutzer',
+      value: '142',
       gradient: ['#667eea', '#764ba2'],
       icon: 'people',
-      subtitle: 'Online Benutzer'
+      subtitle: 'Online Benutzer',
     },
-    { 
-      title: 'Laufende Bots', 
-      value: '8', 
+    {
+      title: 'Laufende Bots',
+      value: '8',
       gradient: ['#f093fb', '#f5576c'],
       icon: 'smart-toy',
-      subtitle: 'Aktiv suchend'
-    }
+      subtitle: 'Aktiv suchend',
+    },
   ];
 
   const secondRowStats = [
-    { 
-      title: 'Anzahl Bewerbungen', 
-      value: '1,247', 
+    {
+      title: 'Anzahl Bewerbungen',
+      value: '1,247',
       gradient: ['#4facfe', '#00f2fe'],
       icon: 'description',
-      subtitle: 'Diese Woche'
+      subtitle: 'Diese Woche',
     },
-    { 
-      title: 'Blockierte Benutzer', 
-      value: '12', 
+    {
+      title: 'Blockierte Benutzer',
+      value: '12',
       gradient: ['#ff9a9e', '#fecfef'],
       icon: 'block',
-      subtitle: 'Gesperrt'
-    }
+      subtitle: 'Gesperrt',
+    },
   ];
 
   const weeklyStats = {
@@ -69,7 +81,7 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
     gradient: ['#4facfe', '#00f2fe'],
     icon: 'trending-up',
     change: '+23',
-    changeType: 'increase'
+    changeType: 'increase',
   };
 
   // Weekly chart data for Users & Applications
@@ -80,7 +92,7 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
     { day: 'Do', users: 15, applications: 71, userHeight: 60, appHeight: 114 },
     { day: 'Fr', users: 22, applications: 54, userHeight: 88, appHeight: 86 },
     { day: 'Sa', users: 6, applications: 29, userHeight: 24, appHeight: 46 },
-    { day: 'So', users: 4, applications: 18, userHeight: 16, appHeight: 29 }
+    { day: 'So', users: 4, applications: 18, userHeight: 16, appHeight: 29 },
   ];
 
   const recentActivities = [
@@ -89,50 +101,52 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
       user: 'max.mueller@email.com',
       time: 'vor 5 Minuten',
       type: 'Registrierung',
-      typeColor: '#34c759'
+      typeColor: '#34c759',
     },
     {
       activity: 'Bot gestartet',
       user: 'anna.schmidt@email.com',
       time: 'vor 12 Minuten',
       type: 'Bot Aktivität',
-      typeColor: '#007aff'
+      typeColor: '#007aff',
     },
     {
       activity: 'Bewerbung versendet',
       user: 'thomas.weber@email.com',
       time: 'vor 18 Minuten',
       type: 'Bewerbung',
-      typeColor: '#ff9500'
+      typeColor: '#ff9500',
     },
     {
       activity: 'Benutzer blockiert',
       user: 'spam.user@email.com',
       time: 'vor 1 Stunde',
       type: 'Moderation',
-      typeColor: '#ff3b30'
-    }
+      typeColor: '#ff3b30',
+    },
   ];
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <UniversalHeader isAdmin={true} />
-      
+
       {/* Main Content */}
       <View style={styles.contentContainer}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom, 100) }
+            { paddingBottom: Math.max(insets.bottom, 100) },
           ]}
           showsVerticalScrollIndicator={false}
         >
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeTitle}>Admin Dashboard</Text>
-            <Text style={styles.welcomeSubtitle}>System Übersicht und Statistiken</Text>
+            <Text style={styles.welcomeSubtitle}>
+              System Übersicht und Statistiken
+            </Text>
           </View>
 
           {/* Top Stats Row */}
@@ -191,7 +205,11 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
             >
               <View style={styles.weeklyHeader}>
                 <View style={styles.weeklyIconContainer}>
-                  <MaterialIcons name={weeklyStats.icon} size={24} color="white" />
+                  <MaterialIcons
+                    name={weeklyStats.icon}
+                    size={24}
+                    color="white"
+                  />
                 </View>
                 <View style={styles.weeklyTextContainer}>
                   <Text style={styles.weeklyValue}>{weeklyStats.value}</Text>
@@ -210,15 +228,21 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
           <View style={styles.chartCard}>
             <View style={styles.chartHeader}>
               <Text style={styles.chartTitle}>Wochenstatistik</Text>
-              <Text style={styles.chartSubtitle}>Benutzer & Bewerbungen der letzten 7 Tage</Text>
+              <Text style={styles.chartSubtitle}>
+                Benutzer & Bewerbungen der letzten 7 Tage
+              </Text>
             </View>
             <View style={styles.chartLegend}>
               <View style={styles.legendItem}>
-                <View style={[styles.legendColor, { backgroundColor: '#667eea' }]} />
+                <View
+                  style={[styles.legendColor, { backgroundColor: '#667eea' }]}
+                />
                 <Text style={styles.legendText}>Benutzer</Text>
               </View>
               <View style={styles.legendItem}>
-                <View style={[styles.legendColor, { backgroundColor: '#f093fb' }]} />
+                <View
+                  style={[styles.legendColor, { backgroundColor: '#f093fb' }]}
+                />
                 <Text style={styles.legendText}>Bewerbungen</Text>
               </View>
             </View>
@@ -227,31 +251,29 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
                 {weeklyChartData.map((day, index) => (
                   <View key={index} style={styles.chartBar}>
                     <View style={styles.barGroup}>
-                      <View 
+                      <View
                         style={[
-                          styles.bar, 
-                          { 
+                          styles.bar,
+                          {
                             height: day.userHeight,
                             backgroundColor: '#667eea',
                             marginRight: 2,
                             width: 12,
-                          }
-                        ]} 
+                          },
+                        ]}
                       />
-                      <View 
+                      <View
                         style={[
-                          styles.bar, 
-                          { 
+                          styles.bar,
+                          {
                             height: day.appHeight,
                             backgroundColor: '#f093fb',
                             width: 12,
-                          }
-                        ]} 
+                          },
+                        ]}
                       />
                     </View>
-                    <Text style={styles.chartDayLabel}>
-                      {day.day}
-                    </Text>
+                    <Text style={styles.chartDayLabel}>{day.day}</Text>
                   </View>
                 ))}
               </View>
@@ -278,22 +300,35 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
                 <Ionicons name="chevron-forward" size={16} color="#667eea" />
               </TouchableOpacity>
             </View>
-            
+
             {recentActivities.map((activity, index) => (
               <TouchableOpacity key={index} style={styles.applicationCard}>
                 <View style={styles.applicationContent}>
                   <View style={styles.applicationLeft}>
-                    <View style={[styles.statusBadge, { backgroundColor: activity.typeColor }]}>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: activity.typeColor },
+                      ]}
+                    >
                       <Text style={styles.statusText}>{activity.type}</Text>
                     </View>
                     <View style={styles.applicationInfo}>
-                      <Text style={styles.companyName}>{activity.activity}</Text>
+                      <Text style={styles.companyName}>
+                        {activity.activity}
+                      </Text>
                       <Text style={styles.companyAddress}>{activity.user}</Text>
-                      <Text style={styles.applicationTime}>{activity.time}</Text>
+                      <Text style={styles.applicationTime}>
+                        {activity.time}
+                      </Text>
                     </View>
                   </View>
                   <View style={styles.applicationRight}>
-                    <Ionicons name="chevron-forward" size={20} color="#c7c7cc" />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color="#c7c7cc"
+                    />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -309,7 +344,7 @@ function AdminDashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () =>
 function AdminDashboardWithTheme() {
   const colorScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
-  
+
   const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
 
   const toggleTheme = () => {
@@ -319,7 +354,10 @@ function AdminDashboardWithTheme() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <PaperProvider theme={theme}>
-        <AdminDashboardContent toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+        <AdminDashboardContent
+          toggleTheme={toggleTheme}
+          isDarkMode={isDarkMode}
+        />
       </PaperProvider>
     </SafeAreaProvider>
   );
@@ -342,7 +380,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  
+
   // Welcome Section
   welcomeSection: {
     marginBottom: 32,
@@ -675,4 +713,4 @@ const styles = StyleSheet.create({
   applicationRight: {
     padding: 4,
   },
-}); 
+});

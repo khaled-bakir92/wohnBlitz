@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '@/constants/api';
 
 export interface BewerbungsprofilData {
   anrede?: string;
@@ -16,7 +17,6 @@ export interface BewerbungsprofilData {
   wbs_besonderer_wohnbedarf?: string;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
 
 export class ProfileService {
   static async getAuthToken(): Promise<string | null> {
@@ -53,7 +53,7 @@ export class ProfileService {
       }
 
       const tokenData = await response.json();
-      
+
       // Store new tokens
       await AsyncStorage.multiSet([
         ['access_token', tokenData.access_token],
@@ -68,7 +68,10 @@ export class ProfileService {
     }
   }
 
-  static async makeAuthenticatedRequest(url: string, options: RequestInit = {}): Promise<Response> {
+  static async makeAuthenticatedRequest(
+    url: string,
+    options: RequestInit = {}
+  ): Promise<Response> {
     const token = await this.getAuthToken();
     if (!token) {
       throw new Error('No authentication token found');
@@ -77,7 +80,7 @@ export class ProfileService {
     // Add authorization header
     const headers = {
       ...options.headers,
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
 
     let response = await fetch(url, {
@@ -89,7 +92,7 @@ export class ProfileService {
     if (response.status === 401) {
       console.log('Token expired, attempting to refresh...');
       const refreshSuccess = await this.refreshAccessToken();
-      
+
       if (refreshSuccess) {
         // Retry the request with new token
         const newToken = await this.getAuthToken();
@@ -97,7 +100,7 @@ export class ProfileService {
           ...options,
           headers: {
             ...options.headers,
-            'Authorization': `Bearer ${newToken}`,
+            Authorization: `Bearer ${newToken}`,
           },
         });
       } else {
@@ -114,11 +117,11 @@ export class ProfileService {
     try {
       await AsyncStorage.multiRemove([
         'access_token',
-        'refresh_token', 
-        'user_email', 
-        'stay_logged_in', 
-        'stored_email', 
-        'stored_password'
+        'refresh_token',
+        'user_email',
+        'stay_logged_in',
+        'stored_email',
+        'stored_password',
       ]);
     } catch (error) {
       console.error('Error during logout:', error);
@@ -129,7 +132,7 @@ export class ProfileService {
   static async isProfileComplete(): Promise<boolean> {
     try {
       const profileData = await this.getBewerbungsprofil();
-      
+
       if (!profileData) {
         return false;
       }
@@ -137,18 +140,19 @@ export class ProfileService {
       // Check if essential profile fields are filled
       const requiredFields = [
         'anrede',
-        'vorname', 
+        'vorname',
         'name',
         'email',
         'telefon',
         'strasse',
         'plz',
-        'ort'
+        'ort',
       ];
 
-      const isComplete = requiredFields.every(field => 
-        profileData[field as keyof BewerbungsprofilData] && 
-        profileData[field as keyof BewerbungsprofilData]?.trim() !== ''
+      const isComplete = requiredFields.every(
+        field =>
+          profileData[field as keyof BewerbungsprofilData] &&
+          profileData[field as keyof BewerbungsprofilData]?.trim() !== ''
       );
 
       return isComplete;
@@ -158,15 +162,20 @@ export class ProfileService {
     }
   }
 
-  static async updateBewerbungsprofil(data: BewerbungsprofilData): Promise<boolean> {
+  static async updateBewerbungsprofil(
+    data: BewerbungsprofilData
+  ): Promise<boolean> {
     try {
-      const response = await this.makeAuthenticatedRequest(`${API_BASE_URL}/api/bewerbungsprofil`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const response = await this.makeAuthenticatedRequest(
+        `${API_BASE_URL}/api/bewerbungsprofil`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -181,9 +190,12 @@ export class ProfileService {
 
   static async getBewerbungsprofil(): Promise<BewerbungsprofilData | null> {
     try {
-      const response = await this.makeAuthenticatedRequest(`${API_BASE_URL}/api/bewerbungsprofil`, {
-        method: 'GET',
-      });
+      const response = await this.makeAuthenticatedRequest(
+        `${API_BASE_URL}/api/bewerbungsprofil`,
+        {
+          method: 'GET',
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

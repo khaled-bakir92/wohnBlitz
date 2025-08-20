@@ -17,4 +17,4 @@ jest.mock('expo-font', () => ({
 }));
 
 // Global test utilities
-global.__TEST__ = true; 
+global.__TEST__ = true;

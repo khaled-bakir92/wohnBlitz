@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
+import { API_BASE_URL } from '@/constants/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Configuration for notification behavior
@@ -16,8 +17,10 @@ Notifications.setNotificationHandler({
 class PushNotificationService {
   private static instance: PushNotificationService;
   private expoPushToken: string | null = null;
-  private API_BASE_URL = 'http://localhost:8000';
-  private onNotificationReceived?: (notification: Notifications.Notification) => void;
+  private API_BASE_URL = API_BASE_URL;
+  private onNotificationReceived?: (
+    notification: Notifications.Notification
+  ) => void;
 
   private constructor() {}
 
@@ -50,9 +53,10 @@ class PushNotificationService {
       }
 
       // Request permissions
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
-      
+
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
@@ -64,7 +68,9 @@ class PushNotificationService {
       }
 
       // Get project ID from constants
-      const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+      const projectId =
+        Constants?.expoConfig?.extra?.eas?.projectId ??
+        Constants?.easConfig?.projectId;
       if (!projectId) {
         console.warn('Project ID not found in constants');
         return null;
@@ -74,7 +80,7 @@ class PushNotificationService {
       const tokenResponse = await Notifications.getExpoPushTokenAsync({
         projectId,
       });
-      
+
       this.expoPushToken = tokenResponse.data;
       console.log('Expo Push Token:', this.expoPushToken);
 
@@ -85,7 +91,6 @@ class PushNotificationService {
       await this.sendTokenToBackend(this.expoPushToken);
 
       return this.expoPushToken;
-
     } catch (error) {
       console.error('Error registering for push notifications:', error);
       return null;
@@ -99,14 +104,16 @@ class PushNotificationService {
     try {
       const accessToken = await AsyncStorage.getItem('access_token');
       if (!accessToken) {
-        console.warn('No access token found, cannot send push token to backend');
+        console.warn(
+          'No access token found, cannot send push token to backend'
+        );
         return;
       }
 
       const response = await fetch(`${this.API_BASE_URL}/api/push/register`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -152,19 +159,22 @@ class PushNotificationService {
     responseListener: Notifications.EventSubscription;
   } {
     // Listen for notifications received while app is in foreground
-    const notificationListener = Notifications.addNotificationReceivedListener(notification => {
-      console.log('Notification received:', notification);
-      // You can add custom logic here, like updating UI or state
-      // For example, refresh the notification count
-      this.onNotificationReceived?.(notification);
-    });
+    const notificationListener = Notifications.addNotificationReceivedListener(
+      notification => {
+        console.log('Notification received:', notification);
+        // You can add custom logic here, like updating UI or state
+        // For example, refresh the notification count
+        this.onNotificationReceived?.(notification);
+      }
+    );
 
     // Listen for user interaction with notifications
-    const responseListener = Notifications.addNotificationResponseReceivedListener(response => {
-      console.log('Notification response:', response);
-      // Handle notification tap/action
-      this.handleNotificationResponse(response);
-    });
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener(response => {
+        console.log('Notification response:', response);
+        // Handle notification tap/action
+        this.handleNotificationResponse(response);
+      });
 
     return { notificationListener, responseListener };
   }
@@ -172,7 +182,9 @@ class PushNotificationService {
   /**
    * Handle notification response (when user taps on notification)
    */
-  private handleNotificationResponse(response: Notifications.NotificationResponse): void {
+  private handleNotificationResponse(
+    response: Notifications.NotificationResponse
+  ): void {
     const { notification } = response;
     const data = notification.request.content.data;
 
@@ -189,7 +201,11 @@ class PushNotificationService {
   /**
    * Schedule local notification (for testing)
    */
-  async scheduleLocalNotification(title: string, body: string, data?: any): Promise<void> {
+  async scheduleLocalNotification(
+    title: string,
+    body: string,
+    data?: any
+  ): Promise<void> {
     try {
       await Notifications.scheduleNotificationAsync({
         content: {
@@ -223,21 +239,28 @@ class PushNotificationService {
    */
   async getLastNotificationResponse(): Promise<Notifications.NotificationResponse | null> {
     // Skip this method entirely on iOS to avoid errors
-    console.log('getLastNotificationResponse: Skipping on iOS - using alternative deep linking methods');
+    console.log(
+      'getLastNotificationResponse: Skipping on iOS - using alternative deep linking methods'
+    );
     return null;
   }
 
   /**
    * Set callback for when notifications are received
    */
-  setNotificationReceivedCallback(callback: (notification: Notifications.Notification) => void): void {
+  setNotificationReceivedCallback(
+    callback: (notification: Notifications.Notification) => void
+  ): void {
     this.onNotificationReceived = callback;
   }
 
   /**
    * Remove notification listeners
    */
-  removeListeners(listeners: { notificationListener: Notifications.EventSubscription; responseListener: Notifications.EventSubscription }): void {
+  removeListeners(listeners: {
+    notificationListener: Notifications.EventSubscription;
+    responseListener: Notifications.EventSubscription;
+  }): void {
     listeners.notificationListener?.remove();
     listeners.responseListener?.remove();
   }

@@ -1,13 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from core.auth import get_current_active_user, get_current_admin_user
 from database.database import get_db
 from models.nachricht import Nachricht as NachrichtModel
 from models.user import User
-from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/api/support", tags=["support"])
 
@@ -47,7 +48,7 @@ def get_support_messages(
     )
 
     if only_unread:
-        query = query.filter(NachrichtModel.ist_gelesen == False)
+        query = query.filter(NachrichtModel.ist_gelesen.is_(False))
 
     nachrichten = (
         query.order_by(NachrichtModel.zeitstempel.desc())
@@ -144,7 +145,7 @@ def get_all_support_messages(
     query = db.query(NachrichtModel).filter(NachrichtModel.bewerbung_id.is_(None))
 
     if only_unread:
-        query = query.filter(NachrichtModel.ist_gelesen == False)
+        query = query.filter(NachrichtModel.ist_gelesen.is_(False))
 
     if user_id:
         query = query.filter(NachrichtModel.user_id == user_id)

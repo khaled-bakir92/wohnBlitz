@@ -15,6 +15,8 @@ import { Image } from 'expo-image';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from 'react-native-toast-message';
 import { ProfileService } from '@/user/profileService';
+import { API_BASE_URL } from '@/constants/api';
+import { useUser } from '@/shared/contexts/UserContext';
 
 const WohnBlitzLogo = () => (
   <View style={styles.logoContainer}>
@@ -38,6 +40,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
+  const { setUser, refreshUser } = useUser();
 
   useEffect(() => {
     checkAutoLogin();
@@ -54,25 +57,42 @@ export default function LoginScreen() {
         setEmail(storedEmail);
         setPassword(storedPassword);
         setStayLoggedIn(true);
-        
+
         // If we have a valid token, try to navigate directly
         if (existingToken) {
           try {
             // Check if user is admin
-            const userInfoResponse = await fetch('http://localhost:8000/api/me', {
-              method: 'GET',
-              headers: {
-                'Authorization': `Bearer ${existingToken}`,
-                'Content-Type': 'application/json',
-              },
-            });
+            const userInfoResponse = await fetch(
+              `${API_BASE_URL}/api/me`,
+              {
+                method: 'GET',
+                headers: {
+                  Authorization: `Bearer ${existingToken}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
 
             if (userInfoResponse.ok) {
               const userInfo = await userInfoResponse.json();
-              const isAdmin = userInfo.is_admin === true || userInfo.is_admin === 1;
+              const isAdmin =
+                userInfo.is_admin === true || userInfo.is_admin === 1;
               const profileCompleted = userInfo.profile_completed === true;
-              console.log('Auto-login check - userInfo.is_admin:', userInfo.is_admin, 'converted to:', isAdmin);
-              console.log('Auto-login check - userInfo.profile_completed:', userInfo.profile_completed, 'converted to:', profileCompleted);
+              
+              // Update user context for auto-login
+              await refreshUser();
+              console.log(
+                'Auto-login check - userInfo.is_admin:',
+                userInfo.is_admin,
+                'converted to:',
+                isAdmin
+              );
+              console.log(
+                'Auto-login check - userInfo.profile_completed:',
+                userInfo.profile_completed,
+                'converted to:',
+                profileCompleted
+              );
               if (isAdmin) {
                 router.replace('/admin' as any);
                 return;
@@ -84,12 +104,12 @@ export default function LoginScreen() {
           } catch (error) {
             console.error('Error checking admin status:', error);
           }
-          
+
           // Regular user flow - go directly to user dashboard
           router.replace('/user');
           return;
         }
-        
+
         // Auto-login
         setIsLoading(true);
         await performLogin(storedEmail, storedPassword, false);
@@ -99,9 +119,13 @@ export default function LoginScreen() {
     }
   };
 
-  const performLogin = async (loginEmail: string, loginPassword: string, showAlert: boolean = true) => {
+  const performLogin = async (
+    loginEmail: string,
+    loginPassword: string,
+    showAlert: boolean = true
+  ) => {
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,25 +141,44 @@ export default function LoginScreen() {
       if (response.ok) {
         await AsyncStorage.setItem('access_token', data.access_token);
         await AsyncStorage.setItem('refresh_token', data.refresh_token);
-        await AsyncStorage.setItem('user_email', loginEmail.toLowerCase().trim());
-        
+        await AsyncStorage.setItem(
+          'user_email',
+          loginEmail.toLowerCase().trim()
+        );
+
         // Store stay logged in preference
         if (stayLoggedIn) {
           await AsyncStorage.setItem('stay_logged_in', 'true');
-          await AsyncStorage.setItem('stored_email', loginEmail.toLowerCase().trim());
+          await AsyncStorage.setItem(
+            'stored_email',
+            loginEmail.toLowerCase().trim()
+          );
           await AsyncStorage.setItem('stored_password', loginPassword);
         } else {
           await AsyncStorage.removeItem('stay_logged_in');
           await AsyncStorage.removeItem('stored_email');
           await AsyncStorage.removeItem('stored_password');
         }
-        
+
         // Check if user is admin and profile completion status
         const isAdmin = data.is_admin === true || data.is_admin === 1;
         const profileCompleted = data.profile_completed === true;
-        console.log('Login response is_admin:', data.is_admin, 'converted to:', isAdmin);
-        console.log('Login response profile_completed:', data.profile_completed, 'converted to:', profileCompleted);
         
+        // Update user context after successful login
+        await refreshUser();
+        console.log(
+          'Login response is_admin:',
+          data.is_admin,
+          'converted to:',
+          isAdmin
+        );
+        console.log(
+          'Login response profile_completed:',
+          data.profile_completed,
+          'converted to:',
+          profileCompleted
+        );
+
         if (isAdmin) {
           // Admin users go directly to admin dashboard
           if (showAlert) {
@@ -225,7 +268,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
@@ -272,11 +315,13 @@ export default function LoginScreen() {
           </View>
 
           {/* Stay Logged In Checkbox */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.checkboxContainer}
             onPress={() => setStayLoggedIn(!stayLoggedIn)}
           >
-            <View style={[styles.checkbox, stayLoggedIn && styles.checkboxChecked]}>
+            <View
+              style={[styles.checkbox, stayLoggedIn && styles.checkboxChecked]}
+            >
               {stayLoggedIn && (
                 <Ionicons name="checkmark" size={16} color="#FFFFFF" />
               )}
@@ -284,8 +329,11 @@ export default function LoginScreen() {
             <Text style={styles.checkboxLabel}>Angemeldet bleiben</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
+          <TouchableOpacity
+            style={[
+              styles.loginButton,
+              isLoading && styles.loginButtonDisabled,
+            ]}
             onPress={handleLogin}
             disabled={isLoading}
           >
@@ -429,4 +477,4 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontWeight: '500',
   },
-}); 
+});

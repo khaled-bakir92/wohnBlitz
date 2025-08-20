@@ -6,12 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
+import { API_BASE_URL } from '@/constants/api';
+import { useUser } from '@/shared/contexts/UserContext';
 
 import ProfileForm from './profile';
 import Profile2Form from './profile2';
@@ -23,6 +26,14 @@ export default function ProfileCompletion() {
   const [currentStep, setCurrentStep] = useState<Step>('profile');
   const [isLoading, setIsLoading] = useState(false);
   const [profileData, setProfileData] = useState<any>({});
+  const { refreshUser, isProfileCompleted, isLoading: userLoading } = useUser();
+
+  // Redirect if profile is already completed
+  useEffect(() => {
+    if (!userLoading && isProfileCompleted) {
+      router.replace('/user');
+    }
+  }, [isProfileCompleted, userLoading]);
 
   const steps = [
     { key: 'profile', title: 'Persönliche Daten', icon: 'person' },
@@ -36,7 +47,7 @@ export default function ProfileCompletion() {
 
   const handleStepComplete = (stepData: any) => {
     setProfileData(prev => ({ ...prev, ...stepData }));
-    
+
     const currentIndex = getCurrentStepIndex();
     if (currentIndex < steps.length - 1) {
       setCurrentStep(steps[currentIndex + 1].key as Step);
@@ -56,16 +67,22 @@ export default function ProfileCompletion() {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/api/bewerbungsprofil', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(completeData),
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/bewerbungsprofil`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(completeData),
+        }
+      );
 
       if (response.ok) {
+        // Update user context to reflect profile completion
+        await refreshUser();
+        
         // Show success toast
         Toast.show({
           type: 'success',
@@ -75,7 +92,7 @@ export default function ProfileCompletion() {
           visibilityTime: 2000,
           autoHide: true,
         });
-        
+
         // Automatically redirect to dashboard after a short delay
         setTimeout(() => {
           router.replace('/user');
@@ -133,32 +150,38 @@ export default function ProfileCompletion() {
         {steps.map((step, index) => {
           const isActive = step.key === currentStep;
           const isCompleted = getCurrentStepIndex() > index;
-          
+
           return (
             <View key={step.key} style={styles.stepContainer}>
-              <View style={[
-                styles.stepCircle,
-                isActive && styles.stepCircleActive,
-                isCompleted && styles.stepCircleCompleted
-              ]}>
+              <View
+                style={[
+                  styles.stepCircle,
+                  isActive && styles.stepCircleActive,
+                  isCompleted && styles.stepCircleCompleted,
+                ]}
+              >
                 <Ionicons
                   name={step.icon as any}
                   size={20}
                   color={isActive || isCompleted ? '#fff' : '#9CA3AF'}
                 />
               </View>
-              <Text style={[
-                styles.stepTitle,
-                isActive && styles.stepTitleActive,
-                isCompleted && styles.stepTitleCompleted
-              ]}>
+              <Text
+                style={[
+                  styles.stepTitle,
+                  isActive && styles.stepTitleActive,
+                  isCompleted && styles.stepTitleCompleted,
+                ]}
+              >
                 {step.title}
               </Text>
               {index < steps.length - 1 && (
-                <View style={[
-                  styles.stepConnector,
-                  isCompleted && styles.stepConnectorCompleted
-                ]} />
+                <View
+                  style={[
+                    styles.stepConnector,
+                    isCompleted && styles.stepConnectorCompleted,
+                  ]}
+                />
               )}
             </View>
           );

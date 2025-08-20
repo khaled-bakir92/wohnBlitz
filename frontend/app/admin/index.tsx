@@ -1,24 +1,34 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity, Alert, RefreshControl, TextInput } from 'react-native';
-import { 
-  SafeAreaProvider, 
-  SafeAreaView, 
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Alert,
+  RefreshControl,
+  TextInput,
+} from 'react-native';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
   useSafeAreaInsets,
-  initialWindowMetrics 
+  initialWindowMetrics,
 } from 'react-native-safe-area-context';
-import { 
-  PaperProvider, 
-  MD3LightTheme, 
+import {
+  PaperProvider,
+  MD3LightTheme,
   MD3DarkTheme,
   Text,
   useTheme,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import UniversalHeader from '@/shared/UniversalHeader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '@/constants/api';
 
 interface User {
   id: number;
@@ -28,83 +38,105 @@ interface User {
   is_admin: boolean;
   is_active: boolean;
   created_at: string;
-  bot_status: 'running' | 'stopped' | 'paused';
+  bot_status: 'running' | 'stopped' | 'paused' | 'starting' | 'stopping' | 'error';
   last_activity: string;
+  current_action: string;
+  applications_sent: number;
+  listings_found: number;
 }
 
 // Bot Management Component
-function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void; isDarkMode: boolean }) {
+function BotManagementContent({
+  toggleTheme,
+  isDarkMode,
+}: {
+  toggleTheme: () => void;
+  isDarkMode: boolean;
+}) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const [users, setUsers] = useState<User[]>([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [loadingBots, setLoadingBots] = useState<{ [key: number]: boolean }>({});
+  const [loadingBots, setLoadingBots] = useState<{ [key: number]: boolean }>(
+    {}
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // Mock data for demonstration
-  const mockUsers: User[] = [
-    {
-      id: 1,
-      email: 'max.mueller@email.com',
-      vorname: 'Max',
-      nachname: 'Müller',
-      is_admin: false,
-      is_active: true,
-      created_at: '2024-01-15T10:30:00Z',
-      bot_status: 'running',
-      last_activity: 'vor 5 Minuten'
-    },
-    {
-      id: 2,
-      email: 'anna.schmidt@email.com',
-      vorname: 'Anna',
-      nachname: 'Schmidt',
-      is_admin: false,
-      is_active: true,
-      created_at: '2024-01-20T14:15:00Z',
-      bot_status: 'stopped',
-      last_activity: 'vor 2 Stunden'
-    },
-    {
-      id: 3,
-      email: 'thomas.weber@email.com',
-      vorname: 'Thomas',
-      nachname: 'Weber',
-      is_admin: false,
-      is_active: true,
-      created_at: '2024-01-25T09:45:00Z',
-      bot_status: 'running',
-      last_activity: 'vor 1 Minute'
-    },
-    {
-      id: 4,
-      email: 'lisa.hoffmann@email.com',
-      vorname: 'Lisa',
-      nachname: 'Hoffmann',
-      is_admin: false,
-      is_active: false,
-      created_at: '2024-01-30T16:20:00Z',
-      bot_status: 'stopped',
-      last_activity: 'vor 1 Tag'
-    },
-    {
-      id: 5,
-      email: 'michael.klein@email.com',
-      vorname: 'Michael',
-      nachname: 'Klein',
-      is_admin: false,
-      is_active: true,
-      created_at: '2024-02-02T11:10:00Z',
-      bot_status: 'paused',
-      last_activity: 'vor 30 Minuten'
-    },
-  ];
+  const getAuthHeaders = async () => {
+    const token = await AsyncStorage.getItem('access_token');
+    if (!token) {
+      throw new Error('No access token found');
+    }
+    return {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const headers = await getAuthHeaders();
+      const response = await fetch(`${API_BASE_URL}/api/bot/admin/users`, { 
+        headers 
+      });
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          Alert.alert(
+            'Zugriff verweigert',
+            'Sie haben keine Administratorrechte.'
+          );
+          return;
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Daten für die Anzeige formatieren
+      const formattedUsers = data.map((user: any) => ({
+        ...user,
+        last_activity: formatLastActivity(user.last_activity),
+      }));
+      
+      setUsers(formattedUsers);
+      setFilteredUsers(formattedUsers);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      Alert.alert('Fehler', 'Fehler beim Laden der Benutzer');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatLastActivity = (lastActivity: string | null) => {
+    if (!lastActivity) return 'Noch nie aktiv';
+    
+    try {
+      const activityDate = new Date(lastActivity);
+      const now = new Date();
+      const diffMs = now.getTime() - activityDate.getTime();
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      
+      if (diffMinutes < 1) return 'gerade eben';
+      if (diffMinutes < 60) return `vor ${diffMinutes} Minute${diffMinutes !== 1 ? 'n' : ''}`;
+      
+      const diffHours = Math.floor(diffMinutes / 60);
+      if (diffHours < 24) return `vor ${diffHours} Stunde${diffHours !== 1 ? 'n' : ''}`;
+      
+      const diffDays = Math.floor(diffHours / 24);
+      return `vor ${diffDays} Tag${diffDays !== 1 ? 'en' : ''}`;
+    } catch {
+      return 'Unbekannt';
+    }
+  };
 
   useEffect(() => {
     // Load users on component mount
-    setUsers(mockUsers);
-    setFilteredUsers(mockUsers);
+    fetchUsers();
   }, []);
 
   // Search functionality
@@ -112,11 +144,14 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
     if (searchQuery.trim() === '') {
       setFilteredUsers(users);
     } else {
-      const filtered = users.filter(user => 
-        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        `${user.vorname} ${user.nachname}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.vorname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.nachname.toLowerCase().includes(searchQuery.toLowerCase())
+      const filtered = users.filter(
+        user =>
+          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          `${user.vorname} ${user.nachname}`
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          user.vorname.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          user.nachname.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setFilteredUsers(filtered);
     }
@@ -124,70 +159,100 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setUsers(mockUsers);
-      setFilteredUsers(mockUsers);
-      setRefreshing(false);
-    }, 1000);
+    await fetchUsers();
+    setRefreshing(false);
   };
 
   const handleBotToggle = async (userId: number, currentStatus: string) => {
     setLoadingBots(prev => ({ ...prev, [userId]: true }));
-    
-    // Simulate API call
-    setTimeout(() => {
-      setUsers(prevUsers => 
-        prevUsers.map(user => 
-          user.id === userId 
-            ? { 
-                ...user, 
-                bot_status: currentStatus === 'running' ? 'stopped' : 'running',
-                last_activity: 'gerade eben'
-              }
-            : user
-        )
+
+    try {
+      const headers = await getAuthHeaders();
+      const action = currentStatus === 'running' ? 'stop' : 'start';
+      const response = await fetch(
+        `${API_BASE_URL}/api/bot/admin/${action}/${userId}`,
+        {
+          method: 'POST',
+          headers,
+        }
       );
-      setLoadingBots(prev => ({ ...prev, [userId]: false }));
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
       
-      const action = currentStatus === 'running' ? 'gestoppt' : 'gestartet';
-      Alert.alert('Erfolg', `Bot wurde ${action}`);
-    }, 1500);
+      if (result.success) {
+        // Benutzer-Liste aktualisieren
+        await fetchUsers();
+        
+        const actionText = currentStatus === 'running' ? 'gestoppt' : 'gestartet';
+        Alert.alert('Erfolg', `Bot wurde ${actionText}`);
+      } else {
+        Alert.alert('Fehler', result.message || 'Fehler beim Bot-Toggle');
+      }
+    } catch (error) {
+      console.error('Error toggling bot:', error);
+      Alert.alert('Fehler', 'Netzwerkfehler beim Bot-Toggle');
+    } finally {
+      setLoadingBots(prev => ({ ...prev, [userId]: false }));
+    }
   };
 
   const getBotStatusColor = (status: string) => {
     switch (status) {
-      case 'running': return '#34c759';
-      case 'paused': return '#ff9500';
-      case 'stopped': return '#ff3b30';
-      default: return '#8e8e93';
+      case 'running':
+        return '#34c759';
+      case 'starting':
+        return '#007aff';
+      case 'stopping':
+        return '#ff9500';
+      case 'paused':
+        return '#ff9500';
+      case 'stopped':
+        return '#8e8e93';
+      case 'error':
+        return '#ff3b30';
+      default:
+        return '#8e8e93';
     }
   };
 
   const getBotStatusText = (status: string) => {
     switch (status) {
-      case 'running': return 'Läuft';
-      case 'paused': return 'Pausiert';
-      case 'stopped': return 'Gestoppt';
-      default: return 'Unbekannt';
+      case 'running':
+        return 'Läuft';
+      case 'starting':
+        return 'Startet...';
+      case 'stopping':
+        return 'Stoppt...';
+      case 'paused':
+        return 'Pausiert';
+      case 'stopped':
+        return 'Gestoppt';
+      case 'error':
+        return 'Fehler';
+      default:
+        return 'Unbekannt';
     }
   };
 
   const statsData = [
-    { 
-      title: 'Aktive Bots', 
-      value: users.filter(u => u.bot_status === 'running').length.toString(), 
+    {
+      title: 'Aktive Bots',
+      value: users.filter(u => u.bot_status === 'running').length.toString(),
       gradient: ['#34c759', '#32d74b'],
       icon: 'play-circle',
-      subtitle: 'Derzeit laufend'
+      subtitle: 'Derzeit laufend',
     },
-    { 
-      title: 'Gestoppte Bots', 
-      value: users.filter(u => u.bot_status === 'stopped').length.toString(), 
+    {
+      title: 'Gestoppte Bots',
+      value: users.filter(u => u.bot_status === 'stopped').length.toString(),
       gradient: ['#ff3b30', '#ff6961'],
       icon: 'stop-circle',
-      subtitle: 'Nicht aktiv'
-    }
+      subtitle: 'Nicht aktiv',
+    },
   ];
 
   const handleClearSearch = () => {
@@ -198,14 +263,14 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
     <View style={styles.container}>
       {/* Header */}
       <UniversalHeader isAdmin={true} />
-      
+
       {/* Main Content */}
       <View style={styles.contentContainer}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom, 100) }
+            { paddingBottom: Math.max(insets.bottom, 100) },
           ]}
           showsVerticalScrollIndicator={false}
           refreshControl={
@@ -215,7 +280,9 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeTitle}>Bot Management</Text>
-            <Text style={styles.welcomeSubtitle}>Verwalten Sie alle Benutzer-Bots</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Verwalten Sie alle Benutzer-Bots
+            </Text>
           </View>
 
           {/* Stats Row */}
@@ -245,7 +312,12 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
           <View style={styles.searchCard}>
             <View style={styles.searchContainer}>
               <View style={styles.searchInputContainer}>
-                <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
+                <Ionicons
+                  name="search"
+                  size={20}
+                  color="#8E8E93"
+                  style={styles.searchIcon}
+                />
                 <TextInput
                   style={styles.searchInput}
                   placeholder="Nach Name oder E-Mail suchen..."
@@ -256,7 +328,7 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
                   autoCorrect={false}
                 />
                 {searchQuery.length > 0 && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     onPress={handleClearSearch}
                     style={styles.clearSearchButton}
                   >
@@ -277,80 +349,128 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
                 {filteredUsers.length} {searchQuery ? 'gefunden' : 'Benutzer'}
               </Text>
             </View>
-            
-            {filteredUsers.length === 0 && searchQuery ? (
+
+            {loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#667eea" />
+                <Text style={styles.loadingText}>Lade Benutzerdaten...</Text>
+              </View>
+            ) : filteredUsers.length === 0 && searchQuery ? (
               <View style={styles.noResultsContainer}>
                 <Ionicons name="search" size={48} color="#C7C7CC" />
-                <Text style={styles.noResultsTitle}>Keine Benutzer gefunden</Text>
+                <Text style={styles.noResultsTitle}>
+                  Keine Benutzer gefunden
+                </Text>
                 <Text style={styles.noResultsSubtitle}>
                   Versuchen Sie einen anderen Suchbegriff
                 </Text>
               </View>
             ) : (
               filteredUsers.map((user, index) => (
-              <View key={user.id} style={styles.userCard}>
-                <View style={styles.userContent}>
-                  <View style={styles.userLeft}>
-                    {/* Avatar */}
-                    <View style={styles.userAvatar}>
-                      <Text style={styles.avatarText}>
-                        {(user.vorname?.[0] || '') + (user.nachname?.[0] || '')}
-                      </Text>
-                    </View>
-                    
-                    {/* User Info */}
-                    <View style={styles.userInfo}>
-                      <View style={styles.userNameRow}>
-                        <Text style={styles.userName}>
-                          {user.vorname} {user.nachname}
+                <View key={user.id} style={styles.userCard}>
+                  <View style={styles.userContent}>
+                    <View style={styles.userLeft}>
+                      {/* Avatar */}
+                      <View style={styles.userAvatar}>
+                        <Text style={styles.avatarText}>
+                          {(user.vorname?.[0] || '') +
+                            (user.nachname?.[0] || '')}
                         </Text>
-                        {user.is_admin && (
-                          <View style={styles.adminBadge}>
-                            <Text style={styles.adminText}>Admin</Text>
-                          </View>
-                        )}
                       </View>
-                      <Text style={styles.userEmail}>{user.email}</Text>
-                      <Text style={styles.userActivity}>Letzte Aktivität: {user.last_activity}</Text>
-                    </View>
-                  </View>
 
-                  {/* Bot Status & Controls */}
-                  <View style={styles.userRight}>
-                    <View style={styles.botStatusContainer}>
-                      <View style={[styles.botStatusBadge, { backgroundColor: getBotStatusColor(user.bot_status) }]}>
-                        <View style={styles.statusDot} />
-                        <Text style={styles.botStatusText}>{getBotStatusText(user.bot_status)}</Text>
-                      </View>
-                      
-                      {/* Bot Control Button */}
-                      <TouchableOpacity
-                        style={[
-                          styles.botButton,
-                          user.bot_status === 'running' ? styles.stopButton : styles.startButton
-                        ]}
-                        onPress={() => handleBotToggle(user.id, user.bot_status)}
-                        disabled={loadingBots[user.id]}
-                      >
-                        {loadingBots[user.id] ? (
-                          <ActivityIndicator size="small" color="white" />
-                        ) : (
-                          <>
-                            <Ionicons 
-                              name={user.bot_status === 'running' ? 'stop' : 'play'} 
-                              size={16} 
-                              color="white" 
-                            />
-                            <Text style={styles.botButtonText}>
-                              {user.bot_status === 'running' ? 'Stoppen' : 'Starten'}
-                            </Text>
-                          </>
+                      {/* User Info */}
+                      <View style={styles.userInfo}>
+                        <View style={styles.userNameRow}>
+                          <Text style={styles.userName}>
+                            {user.vorname} {user.nachname}
+                          </Text>
+                          {user.is_admin && (
+                            <View style={styles.adminBadge}>
+                              <Text style={styles.adminText}>Admin</Text>
+                            </View>
+                          )}
+                        </View>
+                        <Text style={styles.userEmail}>{user.email}</Text>
+                        <Text style={styles.userActivity}>
+                          Letzte Aktivität: {user.last_activity}
+                        </Text>
+                        {user.current_action && (
+                          <Text style={styles.currentAction}>
+                            {user.current_action}
+                          </Text>
                         )}
-                      </TouchableOpacity>
+                        <Text style={styles.botStats}>
+                          Bewerbungen: {user.applications_sent} | Anzeigen: {user.listings_found}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Bot Status & Controls */}
+                    <View style={styles.userRight}>
+                      <View style={styles.botStatusContainer}>
+                        <View
+                          style={[
+                            styles.botStatusBadge,
+                            {
+                              backgroundColor: getBotStatusColor(
+                                user.bot_status
+                              ),
+                            },
+                          ]}
+                        >
+                          <View style={styles.statusDot} />
+                          <Text style={styles.botStatusText}>
+                            {getBotStatusText(user.bot_status)}
+                          </Text>
+                        </View>
+
+                        {/* Bot Control Button */}
+                        <TouchableOpacity
+                          style={[
+                            styles.botButton,
+                            user.bot_status === 'running'
+                              ? styles.stopButton
+                              : styles.startButton,
+                            (user.bot_status === 'starting' || 
+                             user.bot_status === 'stopping' || 
+                             loadingBots[user.id]) && styles.disabledButton,
+                          ]}
+                          onPress={() =>
+                            handleBotToggle(user.id, user.bot_status)
+                          }
+                          disabled={
+                            loadingBots[user.id] || 
+                            user.bot_status === 'starting' || 
+                            user.bot_status === 'stopping'
+                          }
+                        >
+                          {(loadingBots[user.id] || 
+                            user.bot_status === 'starting' || 
+                            user.bot_status === 'stopping') ? (
+                            <ActivityIndicator size="small" color="white" />
+                          ) : (
+                            <>
+                              <Ionicons
+                                name={
+                                  user.bot_status === 'running'
+                                    ? 'stop'
+                                    : 'play'
+                                }
+                                size={16}
+                                color="white"
+                              />
+                              <Text style={styles.botButtonText}>
+                                {user.bot_status === 'running'
+                                  ? 'Stoppen'
+                                  : 'Starten'}
+                              </Text>
+                            </>
+                          )}
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 </View>
-              </View>
               ))
             )}
           </View>
@@ -364,7 +484,7 @@ function BotManagementContent({ toggleTheme, isDarkMode }: { toggleTheme: () => 
 function BotManagementWithTheme() {
   const colorScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
-  
+
   const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
 
   const toggleTheme = () => {
@@ -374,7 +494,10 @@ function BotManagementWithTheme() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <PaperProvider theme={theme}>
-        <BotManagementContent toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+        <BotManagementContent
+          toggleTheme={toggleTheme}
+          isDarkMode={isDarkMode}
+        />
       </PaperProvider>
     </SafeAreaProvider>
   );
@@ -397,7 +520,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  
+
   // Welcome Section
   welcomeSection: {
     marginBottom: 32,
@@ -508,6 +631,19 @@ const styles = StyleSheet.create({
   clearSearchButton: {
     marginLeft: 8,
     padding: 4,
+  },
+
+  // Loading
+  loadingContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#86868b',
+    marginTop: 16,
+    fontWeight: '500',
   },
 
   // No Results
@@ -634,6 +770,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#c7c7cc',
   },
+  currentAction: {
+    fontSize: 12,
+    color: '#007aff',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+  botStats: {
+    fontSize: 11,
+    color: '#86868b',
+    marginTop: 4,
+  },
 
   // Bot Controls
   userRight: {
@@ -686,4 +833,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 6,
   },
-}); 
+});

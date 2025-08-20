@@ -15,48 +15,57 @@ export default function AdminTabLayout() {
   return (
     <NotificationProvider>
       <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.bar.fill" color={color} />,
+        screenOptions={{
+          tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+          headerShown: false,
+          tabBarButton: HapticTab,
+          tabBarBackground: TabBarBackground,
+          tabBarStyle: Platform.select({
+            ios: {
+              // Use a transparent background on iOS to show the blur effect
+              position: 'absolute',
+            },
+            default: {},
+          }),
         }}
-      />
-      <Tabs.Screen
-        name="user-management"
-        options={{
-          title: 'User-Verwaltung',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.2.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Bot',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bolt.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="messages"
-        options={{
-          title: 'Nachrichten',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="message.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+      >
+        <Tabs.Screen
+          name="dashboard"
+          options={{
+            title: 'Dashboard',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="chart.bar.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="user-management"
+          options={{
+            title: 'User-Verwaltung',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="person.2.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="index"
+          options={{
+            title: 'Bot',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="bolt.fill" color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="messages"
+          options={{
+            title: 'Nachrichten',
+            tabBarIcon: ({ color }) => (
+              <IconSymbol size={28} name="message.fill" color={color} />
+            ),
+          }}
+        />
+      </Tabs>
     </NotificationProvider>
   );
-} 
+}

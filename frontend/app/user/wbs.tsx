@@ -32,7 +32,11 @@ const WohnBlitzLogo = () => (
   </View>
 );
 
-const RadioButton = ({ selected, onPress, label }: {
+const RadioButton = ({
+  selected,
+  onPress,
+  label,
+}: {
   selected: boolean;
   onPress: () => void;
   label: string;
@@ -45,7 +49,12 @@ const RadioButton = ({ selected, onPress, label }: {
   </TouchableOpacity>
 );
 
-const DropdownPicker = ({ value, onValueChange, options, placeholder }: {
+const DropdownPicker = ({
+  value,
+  onValueChange,
+  options,
+  placeholder,
+}: {
   value: string;
   onValueChange: (value: string) => void;
   options: string[];
@@ -68,7 +77,7 @@ const DropdownPicker = ({ value, onValueChange, options, placeholder }: {
           color="#9CA3AF"
         />
       </TouchableOpacity>
-      
+
       {isOpen && (
         <View style={styles.dropdownList}>
           {options.map((option, index) => (
@@ -102,7 +111,13 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
   const [isLoading, setIsLoading] = useState(false);
 
   const zimmeranzahlOptions = ['1', '2', '3', '4', '5', '6+'];
-  const einkommensgrenzeOptions = ['WBS 100', 'WBS 140', 'WBS 160', 'WBS 180', 'WBS 220'];
+  const einkommensgrenzeOptions = [
+    'WBS 100',
+    'WBS 140',
+    'WBS 160',
+    'WBS 180',
+    'WBS 220',
+  ];
 
   useEffect(() => {
     if (!onComplete) {
@@ -113,51 +128,66 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
   const loadExistingProfile = async () => {
     const existingProfile = await ProfileService.getBewerbungsprofil();
     if (existingProfile) {
-      if (existingProfile.wbs_vorhanden) setWbsVorhanden(existingProfile.wbs_vorhanden);
-      if (existingProfile.wbs_gueltig_bis) setWbsGueltigBis(existingProfile.wbs_gueltig_bis);
-      if (existingProfile.wbs_zimmeranzahl) setWbsZimmeranzahl(existingProfile.wbs_zimmeranzahl);
-      if (existingProfile.einkommensgrenze) setEinkommensgrenze(existingProfile.einkommensgrenze);
-      if (existingProfile.wbs_besonderer_wohnbedarf) setWbsBesondererWohnbedarf(existingProfile.wbs_besonderer_wohnbedarf);
+      if (existingProfile.wbs_vorhanden)
+        setWbsVorhanden(existingProfile.wbs_vorhanden);
+      if (existingProfile.wbs_gueltig_bis)
+        setWbsGueltigBis(existingProfile.wbs_gueltig_bis);
+      if (existingProfile.wbs_zimmeranzahl)
+        setWbsZimmeranzahl(existingProfile.wbs_zimmeranzahl);
+      if (existingProfile.einkommensgrenze)
+        setEinkommensgrenze(existingProfile.einkommensgrenze);
+      if (existingProfile.wbs_besonderer_wohnbedarf)
+        setWbsBesondererWohnbedarf(existingProfile.wbs_besonderer_wohnbedarf);
     }
   };
 
   const validateDate = (dateString: string): boolean => {
     if (!dateString) return true; // Empty date is allowed
-    
+
     // Check format dd.mm.yyyy
     const dateRegex = /^(\d{2})\.(\d{2})\.(\d{4})$/;
     const match = dateString.match(dateRegex);
-    
+
     if (!match) return false;
-    
+
     const day = parseInt(match[1], 10);
     const month = parseInt(match[2], 10);
     const year = parseInt(match[3], 10);
-    
+
     // Check if date is valid
     const date = new Date(year, month - 1, day);
-    if (date.getDate() !== day || date.getMonth() !== month - 1 || date.getFullYear() !== year) {
+    if (
+      date.getDate() !== day ||
+      date.getMonth() !== month - 1 ||
+      date.getFullYear() !== year
+    ) {
       return false;
     }
-    
+
     // Check if date is in the future
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to start of day
-    
+
     return date >= today;
   };
 
   const formatDateInput = (text: string): string => {
     // Remove all non-digits
     const cleaned = text.replace(/\D/g, '');
-    
+
     // Add dots automatically
     if (cleaned.length <= 2) {
       return cleaned;
     } else if (cleaned.length <= 4) {
       return cleaned.slice(0, 2) + '.' + cleaned.slice(2);
     } else {
-      return cleaned.slice(0, 2) + '.' + cleaned.slice(2, 4) + '.' + cleaned.slice(4, 8);
+      return (
+        cleaned.slice(0, 2) +
+        '.' +
+        cleaned.slice(2, 4) +
+        '.' +
+        cleaned.slice(4, 8)
+      );
     }
   };
 
@@ -170,9 +200,15 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
     // Validate WBS date if provided
     if (wbsGueltigBis && !validateDate(wbsGueltigBis)) {
       if (!wbsGueltigBis.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)) {
-        Alert.alert('Ungültiges Datum', 'Bitte geben Sie das Datum im Format TT.MM.JJJJ ein.');
+        Alert.alert(
+          'Ungültiges Datum',
+          'Bitte geben Sie das Datum im Format TT.MM.JJJJ ein.'
+        );
       } else {
-        Alert.alert('Ungültiges Datum', 'Das WBS-Gültigkeitsdatum muss in der Zukunft liegen.');
+        Alert.alert(
+          'Ungültiges Datum',
+          'Das WBS-Gültigkeitsdatum muss in der Zukunft liegen.'
+        );
       }
       return;
     }
@@ -212,7 +248,7 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
@@ -250,7 +286,9 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
                     <TextInput
                       style={[
                         styles.dateInput,
-                        wbsGueltigBis && !validateDate(wbsGueltigBis) && styles.dateInputError
+                        wbsGueltigBis &&
+                          !validateDate(wbsGueltigBis) &&
+                          styles.dateInputError,
                       ]}
                       placeholder="dd.mm.yyyy"
                       placeholderTextColor="#C7C7CC"
@@ -259,14 +297,18 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
                       keyboardType="numeric"
                       maxLength={10}
                     />
-                    <Ionicons name="calendar-outline" size={20} color="#9CA3AF" style={styles.calendarIcon} />
+                    <Ionicons
+                      name="calendar-outline"
+                      size={20}
+                      color="#9CA3AF"
+                      style={styles.calendarIcon}
+                    />
                   </View>
                   {wbsGueltigBis && !validateDate(wbsGueltigBis) && (
                     <Text style={styles.errorText}>
-                      {!wbsGueltigBis.match(/^(\d{2})\.(\d{2})\.(\d{4})$/) 
-                        ? 'Format: TT.MM.JJJJ' 
-                        : 'Datum muss in der Zukunft liegen'
-                      }
+                      {!wbsGueltigBis.match(/^(\d{2})\.(\d{2})\.(\d{4})$/)
+                        ? 'Format: TT.MM.JJJJ'
+                        : 'Datum muss in der Zukunft liegen'}
                     </Text>
                   )}
                 </View>
@@ -282,7 +324,9 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Einkommensgrenze nach Einkommensbescheinigung § 9</Text>
+                  <Text style={styles.label}>
+                    Einkommensgrenze nach Einkommensbescheinigung § 9
+                  </Text>
                   <DropdownPicker
                     value={einkommensgrenze}
                     onValueChange={setEinkommensgrenze}
@@ -292,11 +336,17 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
                 </View>
 
                 <View style={styles.radioSection}>
-                  <Text style={styles.label}>WBS mit besonderem Wohnbedarf</Text>
+                  <Text style={styles.label}>
+                    WBS mit besonderem Wohnbedarf
+                  </Text>
                   <View style={styles.radioGroupHorizontal}>
                     <RadioButton
                       selected={wbsBesondererWohnbedarf === 'Ja'}
-                      onPress={() => setWbsBesondererWohnbedarf(wbsBesondererWohnbedarf === 'Ja' ? '' : 'Ja')}
+                      onPress={() =>
+                        setWbsBesondererWohnbedarf(
+                          wbsBesondererWohnbedarf === 'Ja' ? '' : 'Ja'
+                        )
+                      }
                       label="Ja"
                     />
                   </View>
@@ -304,8 +354,11 @@ export default function WBSScreen({ onComplete }: WBSFormProps = {}) {
               </>
             )}
 
-            <TouchableOpacity 
-              style={[styles.getStartedButton, isLoading && styles.getStartedButtonDisabled]} 
+            <TouchableOpacity
+              style={[
+                styles.getStartedButton,
+                isLoading && styles.getStartedButtonDisabled,
+              ]}
               onPress={handleGetStarted}
               disabled={isLoading}
             >

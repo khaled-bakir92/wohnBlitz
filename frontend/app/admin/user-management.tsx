@@ -27,7 +27,7 @@ interface User {
   created_at: string;
 }
 
-const API_BASE_URL = 'http://localhost:8000';
+import { API_BASE_URL } from '@/constants/api';
 
 export default function UserManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -39,7 +39,7 @@ export default function UserManagement() {
   const [refreshing, setRefreshing] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(true);  // Start with true for admin tabs
+  const [isAdmin, setIsAdmin] = useState(true); // Start with true for admin tabs
   const [checkingAdmin, setCheckingAdmin] = useState(false);
   const [newUserRole, setNewUserRole] = useState<'user' | 'admin'>('user');
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,44 +47,46 @@ export default function UserManagement() {
 
   const getAuthHeaders = async () => {
     const token = await AsyncStorage.getItem('access_token');
-    console.log('Retrieved token:', token ? `${token.substring(0, 20)}...` : 'null');
-    
+    console.log(
+      'Retrieved token:',
+      token ? `${token.substring(0, 20)}...` : 'null'
+    );
+
     if (!token) {
       throw new Error('No access token found');
     }
-    
+
     return {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
   };
-
 
   const fetchUsers = async () => {
     try {
       setRefreshing(true);
       const headers = await getAuthHeaders();
       const response = await fetch(`${API_BASE_URL}/api/users/`, { headers });
-      
+
       if (!response.ok) {
         if (response.status === 403) {
           Alert.alert(
-            'Zugriff verweigert', 
+            'Zugriff verweigert',
             'Sie haben keine Administratorrechte. Nur Administratoren können Benutzer verwalten.',
             [
-              { 
-                text: 'OK', 
+              {
+                text: 'OK',
                 onPress: () => {
                   // Could navigate back or to a different screen
-                }
-              }
+                },
+              },
             ]
           );
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setUsers(data);
       setFilteredUsers(data); // Initialize filtered users
@@ -108,10 +110,11 @@ export default function UserManagement() {
     if (query.trim() === '') {
       setFilteredUsers(users);
     } else {
-      const filtered = users.filter(user => 
-        user.email.toLowerCase().includes(query.toLowerCase()) ||
-        user.nachname.toLowerCase().includes(query.toLowerCase()) ||
-        user.vorname.toLowerCase().includes(query.toLowerCase())
+      const filtered = users.filter(
+        user =>
+          user.email.toLowerCase().includes(query.toLowerCase()) ||
+          user.nachname.toLowerCase().includes(query.toLowerCase()) ||
+          user.vorname.toLowerCase().includes(query.toLowerCase())
       );
       setFilteredUsers(filtered);
     }
@@ -130,10 +133,13 @@ export default function UserManagement() {
           onPress: async () => {
             try {
               const headers = await getAuthHeaders();
-              const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
-                method: 'DELETE',
-                headers,
-              });
+              const response = await fetch(
+                `${API_BASE_URL}/api/users/${userId}`,
+                {
+                  method: 'DELETE',
+                  headers,
+                }
+              );
 
               if (response.ok) {
                 Alert.alert('Erfolg', 'Benutzer wurde gelöscht');
@@ -144,13 +150,17 @@ export default function UserManagement() {
             } catch (error) {
               Alert.alert('Fehler', 'Netzwerkfehler beim Löschen');
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-  const toggleUserStatus = async (userId: number, userEmail: string, isActive: boolean) => {
+  const toggleUserStatus = async (
+    userId: number,
+    userEmail: string,
+    isActive: boolean
+  ) => {
     const action = isActive ? 'blockieren' : 'aktivieren';
     Alert.alert(
       `Benutzer ${action}`,
@@ -162,13 +172,19 @@ export default function UserManagement() {
           onPress: async () => {
             try {
               const headers = await getAuthHeaders();
-              const response = await fetch(`${API_BASE_URL}/api/users/${userId}/toggle-status`, {
-                method: 'PUT',
-                headers,
-              });
+              const response = await fetch(
+                `${API_BASE_URL}/api/users/${userId}/toggle-status`,
+                {
+                  method: 'PUT',
+                  headers,
+                }
+              );
 
               if (response.ok) {
-                Alert.alert('Erfolg', `Benutzer wurde ${isActive ? 'blockiert' : 'aktiviert'}`);
+                Alert.alert(
+                  'Erfolg',
+                  `Benutzer wurde ${isActive ? 'blockiert' : 'aktiviert'}`
+                );
                 fetchUsers();
               } else {
                 Alert.alert('Fehler', `Fehler beim ${action} des Benutzers`);
@@ -176,8 +192,8 @@ export default function UserManagement() {
             } catch (error) {
               Alert.alert('Fehler', `Netzwerkfehler beim ${action}`);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -193,23 +209,32 @@ export default function UserManagement() {
           onPress: async () => {
             try {
               const headers = await getAuthHeaders();
-              const response = await fetch(`${API_BASE_URL}/api/users/${userId}/reset-password`, {
-                method: 'PUT',
-                headers,
-              });
+              const response = await fetch(
+                `${API_BASE_URL}/api/users/${userId}/reset-password`,
+                {
+                  method: 'PUT',
+                  headers,
+                }
+              );
 
               if (response.ok) {
                 const result = await response.json();
                 setGeneratedPassword(result.new_password);
                 setShowPasswordModal(true);
               } else {
-                Alert.alert('Fehler', 'Fehler beim Generieren des neuen Passworts');
+                Alert.alert(
+                  'Fehler',
+                  'Fehler beim Generieren des neuen Passworts'
+                );
               }
             } catch (error) {
-              Alert.alert('Fehler', 'Netzwerkfehler beim Generieren des Passworts');
+              Alert.alert(
+                'Fehler',
+                'Netzwerkfehler beim Generieren des Passworts'
+              );
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -239,24 +264,27 @@ export default function UserManagement() {
     try {
       const headers = await getAuthHeaders();
       const isAdminFlag = newUserRole === 'admin';
-      console.log('Creating user with:', { 
+      console.log('Creating user with:', {
         email: email.trim(),
         vorname: vorname.trim(),
         nachname: nachname.trim(),
         is_admin: isAdminFlag,
-        role: newUserRole 
+        role: newUserRole,
       });
-      
-      const response = await fetch(`${API_BASE_URL}/api/users/create-with-email`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ 
-          email: email.trim(),
-          vorname: vorname.trim(),
-          nachname: nachname.trim(),
-          is_admin: isAdminFlag
-        }),
-      });
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/users/create-with-email`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            email: email.trim(),
+            vorname: vorname.trim(),
+            nachname: nachname.trim(),
+            is_admin: isAdminFlag,
+          }),
+        }
+      );
 
       if (response.ok) {
         const result = await response.json();
@@ -280,10 +308,16 @@ export default function UserManagement() {
         Alert.alert('Info', 'Backend-Fehler, aber UI wird getestet');
       } else {
         if (response.status === 403) {
-          Alert.alert('Zugriff verweigert', 'Sie haben keine Administratorrechte.');
+          Alert.alert(
+            'Zugriff verweigert',
+            'Sie haben keine Administratorrechte.'
+          );
         } else {
           const errorData = await response.json();
-          Alert.alert('Fehler', errorData.detail || 'Fehler beim Erstellen des Benutzers');
+          Alert.alert(
+            'Fehler',
+            errorData.detail || 'Fehler beim Erstellen des Benutzers'
+          );
         }
       }
     } catch (error) {
@@ -301,11 +335,9 @@ export default function UserManagement() {
     } catch (error) {
       // Fallback: Show password in alert if clipboard fails
       Alert.alert(
-        'Passwort', 
+        'Passwort',
         `${generatedPassword}\n\nBitte manuell kopieren.`,
-        [
-          { text: 'OK', style: 'default' }
-        ]
+        [{ text: 'OK', style: 'default' }]
       );
     }
   };
@@ -315,10 +347,9 @@ export default function UserManagement() {
       <View style={styles.userInfo}>
         <View style={styles.userHeader}>
           <Text style={styles.userName}>
-            {item.vorname || item.nachname 
+            {item.vorname || item.nachname
               ? `${item.vorname} ${item.nachname}`.trim()
-              : 'Unbekannter Name'
-            }
+              : 'Unbekannter Name'}
           </Text>
           {item.is_admin && (
             <View style={styles.adminBadge}>
@@ -337,25 +368,28 @@ export default function UserManagement() {
         </Text>
       </View>
       <View style={styles.userActions}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.actionButton, styles.passwordButton]}
           onPress={() => generateNewPassword(item.id, item.email)}
         >
           <Ionicons name="key" size={16} color="#FF9500" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.actionButton, item.is_active ? styles.blockButton : styles.activateButton]}
+
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            item.is_active ? styles.blockButton : styles.activateButton,
+          ]}
           onPress={() => toggleUserStatus(item.id, item.email, item.is_active)}
         >
-          <Ionicons 
-            name={item.is_active ? "ban" : "checkmark-circle"} 
-            size={16} 
-            color={item.is_active ? "#FF9500" : "#34C759"} 
+          <Ionicons
+            name={item.is_active ? 'ban' : 'checkmark-circle'}
+            size={16}
+            color={item.is_active ? '#FF9500' : '#34C759'}
           />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.actionButton, styles.deleteButton]}
           onPress={() => deleteUser(item.id, item.email)}
         >
@@ -370,10 +404,10 @@ export default function UserManagement() {
   return (
     <View style={styles.container}>
       <UniversalHeader isAdmin={true} />
-      
+
       <View style={styles.contentContainer}>
         <View style={styles.header}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.addButton}
             onPress={() => setShowCreateModal(true)}
           >
@@ -382,205 +416,252 @@ export default function UserManagement() {
           </TouchableOpacity>
         </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={20} color="#8E8E93" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Nach E-Mail oder Namen suchen..."
-            placeholderTextColor="#C7C7CC"
-            value={searchQuery}
-            onChangeText={handleSearch}
-            autoCapitalize="none"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity 
-              onPress={() => handleSearch('')}
-              style={styles.clearSearchButton}
-            >
-              <Ionicons name="close-circle" size={20} color="#8E8E93" />
-            </TouchableOpacity>
-          )}
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons
+              name="search"
+              size={20}
+              color="#8E8E93"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Nach E-Mail oder Namen suchen..."
+              placeholderTextColor="#C7C7CC"
+              value={searchQuery}
+              onChangeText={handleSearch}
+              autoCapitalize="none"
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                onPress={() => handleSearch('')}
+                style={styles.clearSearchButton}
+              >
+                <Ionicons name="close-circle" size={20} color="#8E8E93" />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
 
-      <FlatList
-        data={filteredUsers}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderUser}
-        contentContainerStyle={styles.listContainer}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
-        }
-        showsVerticalScrollIndicator={false}
-      />
+        <FlatList
+          data={filteredUsers}
+          keyExtractor={item => item.id.toString()}
+          renderItem={renderUser}
+          contentContainerStyle={styles.listContainer}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
+          }
+          showsVerticalScrollIndicator={false}
+        />
 
-      {/* Create User Modal */}
-      <Modal
-        visible={showCreateModal}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView style={styles.modalContainer}>
-          <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={() => setShowCreateModal(false)}>
-              <Text style={styles.cancelButton}>Abbrechen</Text>
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Neuer Benutzer</Text>
-            <TouchableOpacity 
-              onPress={createUser}
-              disabled={loading}
-              style={[styles.createButton, loading && styles.createButtonDisabled]}
-            >
-              <Text style={[styles.createButtonText, loading && styles.createButtonTextDisabled]}>
-                {loading ? 'Erstellen...' : 'Erstellen'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.modalContent}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Vorname</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="person" size={20} color="#8E8E93" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  value={vorname}
-                  onChangeText={setVorname}
-                  placeholder="Max"
-                  placeholderTextColor="#C7C7CC"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Nachname</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="person" size={20} color="#8E8E93" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  value={nachname}
-                  onChangeText={setNachname}
-                  placeholder="Mustermann"
-                  placeholderTextColor="#C7C7CC"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                />
-              </View>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>E-Mail-Adresse</Text>
-              <View style={styles.inputContainer}>
-                <Ionicons name="mail" size={20} color="#8E8E93" style={styles.inputIcon} />
-                <TextInput
-                  style={styles.textInput}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="max.mustermann@example.com"
-                  placeholderTextColor="#C7C7CC"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
-              </View>
-              <Text style={styles.inputHint}>
-                Ein sicheres Passwort wird automatisch generiert und angezeigt.
-              </Text>
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Benutzerrolle</Text>
-              <View style={styles.roleContainer}>
-                <TouchableOpacity
+        {/* Create User Modal */}
+        <Modal
+          visible={showCreateModal}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <SafeAreaView style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setShowCreateModal(false)}>
+                <Text style={styles.cancelButton}>Abbrechen</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Neuer Benutzer</Text>
+              <TouchableOpacity
+                onPress={createUser}
+                disabled={loading}
+                style={[
+                  styles.createButton,
+                  loading && styles.createButtonDisabled,
+                ]}
+              >
+                <Text
                   style={[
-                    styles.roleButton,
-                    newUserRole === 'user' && styles.roleButtonActive
+                    styles.createButtonText,
+                    loading && styles.createButtonTextDisabled,
                   ]}
-                  onPress={() => setNewUserRole('user')}
                 >
-                  <Ionicons 
-                    name="person" 
-                    size={20} 
-                    color={newUserRole === 'user' ? '#FFFFFF' : '#007AFF'} 
-                  />
-                  <Text style={[
-                    styles.roleButtonText,
-                    newUserRole === 'user' && styles.roleButtonTextActive
-                  ]}>
-                    Benutzer
-                  </Text>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={[
-                    styles.roleButton,
-                    newUserRole === 'admin' && styles.roleButtonActive
-                  ]}
-                  onPress={() => setNewUserRole('admin')}
-                >
-                  <Ionicons 
-                    name="shield-checkmark" 
-                    size={20} 
-                    color={newUserRole === 'admin' ? '#FFFFFF' : '#007AFF'} 
-                  />
-                  <Text style={[
-                    styles.roleButtonText,
-                    newUserRole === 'admin' && styles.roleButtonTextActive
-                  ]}>
-                    Administrator
-                  </Text>
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.inputHint}>
-                Administratoren haben vollen Zugriff auf die Benutzerverwaltung.
-              </Text>
-            </View>
-          </View>
-        </SafeAreaView>
-      </Modal>
-
-      {/* Password Display Modal */}
-      <Modal
-        visible={showPasswordModal}
-        animationType="fade"
-        transparent={true}
-      >
-        <View style={styles.overlay}>
-          <View style={styles.passwordModal}>
-            <View style={styles.successIcon}>
-              <Ionicons name="checkmark-circle" size={64} color="#34C759" />
-            </View>
-            <Text style={styles.successTitle}>Benutzer erfolgreich erstellt!</Text>
-            <Text style={styles.passwordLabel}>Generiertes Passwort:</Text>
-            <View style={styles.passwordContainer}>
-              <Text style={styles.passwordText} selectable={true}>{generatedPassword}</Text>
-              <TouchableOpacity style={styles.copyButton} onPress={copyPassword}>
-                <Ionicons name="copy-outline" size={24} color="#007AFF" />
+                  {loading ? 'Erstellen...' : 'Erstellen'}
+                </Text>
               </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.quickCopyButton} onPress={copyPassword}>
-              <Ionicons name="clipboard-outline" size={16} color="#FFFFFF" />
-              <Text style={styles.quickCopyText}>In Zwischenablage kopieren</Text>
-            </TouchableOpacity>
-            <Text style={styles.passwordWarning}>
-              ⚠️ Speichern Sie dieses Passwort sicher. Es wird nur einmal angezeigt.
-            </Text>
-            <TouchableOpacity 
-              style={styles.doneButton}
-              onPress={() => {
-                setShowPasswordModal(false);
-                setGeneratedPassword('');
-              }}
-            >
-              <Text style={styles.doneButtonText}>Verstanden</Text>
-            </TouchableOpacity>
+
+            <View style={styles.modalContent}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Vorname</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="person"
+                    size={20}
+                    color="#8E8E93"
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={vorname}
+                    onChangeText={setVorname}
+                    placeholder="Max"
+                    placeholderTextColor="#C7C7CC"
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Nachname</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="person"
+                    size={20}
+                    color="#8E8E93"
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={nachname}
+                    onChangeText={setNachname}
+                    placeholder="Mustermann"
+                    placeholderTextColor="#C7C7CC"
+                    autoCapitalize="words"
+                    autoCorrect={false}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>E-Mail-Adresse</Text>
+                <View style={styles.inputContainer}>
+                  <Ionicons
+                    name="mail"
+                    size={20}
+                    color="#8E8E93"
+                    style={styles.inputIcon}
+                  />
+                  <TextInput
+                    style={styles.textInput}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="max.mustermann@example.com"
+                    placeholderTextColor="#C7C7CC"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                  />
+                </View>
+                <Text style={styles.inputHint}>
+                  Ein sicheres Passwort wird automatisch generiert und
+                  angezeigt.
+                </Text>
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.inputLabel}>Benutzerrolle</Text>
+                <View style={styles.roleContainer}>
+                  <TouchableOpacity
+                    style={[
+                      styles.roleButton,
+                      newUserRole === 'user' && styles.roleButtonActive,
+                    ]}
+                    onPress={() => setNewUserRole('user')}
+                  >
+                    <Ionicons
+                      name="person"
+                      size={20}
+                      color={newUserRole === 'user' ? '#FFFFFF' : '#007AFF'}
+                    />
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        newUserRole === 'user' && styles.roleButtonTextActive,
+                      ]}
+                    >
+                      Benutzer
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.roleButton,
+                      newUserRole === 'admin' && styles.roleButtonActive,
+                    ]}
+                    onPress={() => setNewUserRole('admin')}
+                  >
+                    <Ionicons
+                      name="shield-checkmark"
+                      size={20}
+                      color={newUserRole === 'admin' ? '#FFFFFF' : '#007AFF'}
+                    />
+                    <Text
+                      style={[
+                        styles.roleButtonText,
+                        newUserRole === 'admin' && styles.roleButtonTextActive,
+                      ]}
+                    >
+                      Administrator
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.inputHint}>
+                  Administratoren haben vollen Zugriff auf die
+                  Benutzerverwaltung.
+                </Text>
+              </View>
+            </View>
+          </SafeAreaView>
+        </Modal>
+
+        {/* Password Display Modal */}
+        <Modal
+          visible={showPasswordModal}
+          animationType="fade"
+          transparent={true}
+        >
+          <View style={styles.overlay}>
+            <View style={styles.passwordModal}>
+              <View style={styles.successIcon}>
+                <Ionicons name="checkmark-circle" size={64} color="#34C759" />
+              </View>
+              <Text style={styles.successTitle}>
+                Benutzer erfolgreich erstellt!
+              </Text>
+              <Text style={styles.passwordLabel}>Generiertes Passwort:</Text>
+              <View style={styles.passwordContainer}>
+                <Text style={styles.passwordText} selectable={true}>
+                  {generatedPassword}
+                </Text>
+                <TouchableOpacity
+                  style={styles.copyButton}
+                  onPress={copyPassword}
+                >
+                  <Ionicons name="copy-outline" size={24} color="#007AFF" />
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                style={styles.quickCopyButton}
+                onPress={copyPassword}
+              >
+                <Ionicons name="clipboard-outline" size={16} color="#FFFFFF" />
+                <Text style={styles.quickCopyText}>
+                  In Zwischenablage kopieren
+                </Text>
+              </TouchableOpacity>
+              <Text style={styles.passwordWarning}>
+                ⚠️ Speichern Sie dieses Passwort sicher. Es wird nur einmal
+                angezeigt.
+              </Text>
+              <TouchableOpacity
+                style={styles.doneButton}
+                onPress={() => {
+                  setShowPasswordModal(false);
+                  setGeneratedPassword('');
+                }}
+              >
+                <Text style={styles.doneButtonText}>Verstanden</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
       </View>
     </View>
   );
@@ -988,4 +1069,4 @@ const styles = StyleSheet.create({
   deleteButton: {
     backgroundColor: '#FFEBEE',
   },
-}); 
+});

@@ -1,15 +1,21 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { StyleSheet, ScrollView, View, TouchableOpacity, Dimensions } from 'react-native';
-import { 
-  SafeAreaProvider, 
-  SafeAreaView, 
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
   useSafeAreaInsets,
-  initialWindowMetrics 
+  initialWindowMetrics,
 } from 'react-native-safe-area-context';
-import { 
-  PaperProvider, 
-  MD3LightTheme, 
+import {
+  PaperProvider,
+  MD3LightTheme,
   MD3DarkTheme,
   Card,
   Surface,
@@ -18,7 +24,7 @@ import {
   useTheme,
   Badge,
   Modal,
-  Portal
+  Portal,
 } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -32,45 +38,51 @@ const getStatusConfig = (status: string) => {
       return {
         color: '#10B981',
         icon: 'checkmark-circle',
-        displayText: 'Beworben'
+        displayText: 'Beworben',
       };
     case 'skiped':
       return {
         color: '#EF4444',
         icon: 'close-circle',
-        displayText: 'Übersprungen'
+        displayText: 'Übersprungen',
       };
     default:
       return {
         color: '#6B7280',
         icon: 'help-circle',
-        displayText: status
+        displayText: status,
       };
   }
 };
 
 // Dashboard Component
-function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void; isDarkMode: boolean }) {
+function DashboardContent({
+  toggleTheme,
+  isDarkMode,
+}: {
+  toggleTheme: () => void;
+  isDarkMode: boolean;
+}) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  
+
   const statsData = [
-    { 
-      title: 'Gesamt Bewerbungen', 
-      value: '47', 
+    {
+      title: 'Gesamt Bewerbungen',
+      value: '47',
       gradient: ['#667eea', '#764ba2'],
       icon: 'description',
-      subtitle: 'Total eingereicht'
+      subtitle: 'Total eingereicht',
     },
-    { 
-      title: 'Heute versendet', 
-      value: '3', 
+    {
+      title: 'Heute versendet',
+      value: '3',
       gradient: ['#f093fb', '#f5576c'],
       icon: 'send',
-      subtitle: 'Neue Bewerbungen'
-    }
+      subtitle: 'Neue Bewerbungen',
+    },
   ];
 
   const weeklyStats = {
@@ -80,7 +92,7 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
     gradient: ['#4facfe', '#00f2fe'],
     icon: 'trending-up',
     change: '+4',
-    changeType: 'increase'
+    changeType: 'increase',
   };
 
   const weeklyChartData = [
@@ -90,7 +102,7 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
     { day: 'Do', value: 6, height: 60 },
     { day: 'Fr', value: 7, height: 70 },
     { day: 'Sa', value: 2, height: 20 },
-    { day: 'So', value: 1, height: 10 }
+    { day: 'So', value: 1, height: 10 },
   ];
 
   const applications = [
@@ -109,8 +121,8 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
         warmmiete: '850.0 €',
         zimmer: 2,
         wbsErforderlich: 'Nein',
-        url: 'https://www.immobilien-schmidt.de/wohnungen/details/2-zimmer-mitte'
-      }
+        url: 'https://www.immobilien-schmidt.de/wohnungen/details/2-zimmer-mitte',
+      },
     },
     {
       id: 2,
@@ -127,8 +139,8 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
         warmmiete: '1200.5 €',
         zimmer: 3,
         wbsErforderlich: 'Ja',
-        url: 'https://www.wohnungsgenossenschaft-berlin.de/angebote/3-zimmer-prenzlauer'
-      }
+        url: 'https://www.wohnungsgenossenschaft-berlin.de/angebote/3-zimmer-prenzlauer',
+      },
     },
     {
       id: 3,
@@ -145,8 +157,8 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
         warmmiete: '650.0 €',
         zimmer: 1,
         wbsErforderlich: 'Nein',
-        url: 'https://www.privat-vermieter.de/hamburg/1-zimmer-67'
-      }
+        url: 'https://www.privat-vermieter.de/hamburg/1-zimmer-67',
+      },
     },
     {
       id: 4,
@@ -163,8 +175,8 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
         warmmiete: '920.3 €',
         zimmer: 2,
         wbsErforderlich: 'Nein',
-        url: 'https://www.berlin-housing.de/wohnungen/friedrichstrasse-88'
-      }
+        url: 'https://www.berlin-housing.de/wohnungen/friedrichstrasse-88',
+      },
     },
     {
       id: 5,
@@ -181,9 +193,9 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
         warmmiete: '1650.8 €',
         zimmer: 4,
         wbsErforderlich: 'Ja',
-        url: 'https://www.stadthaus-vermietung.de/friedrichshain/4-zimmer'
-      }
-    }
+        url: 'https://www.stadthaus-vermietung.de/friedrichshain/4-zimmer',
+      },
+    },
   ];
 
   const openApplicationDetail = (application: any) => {
@@ -201,21 +213,23 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
     <View style={styles.container}>
       {/* Header */}
       <WohnBlitzHeader />
-      
+
       {/* Main Content */}
       <View style={styles.contentContainer}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContent,
-            { paddingBottom: Math.max(insets.bottom, 100) }
+            { paddingBottom: Math.max(insets.bottom, 100) },
           ]}
           showsVerticalScrollIndicator={false}
         >
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
             <Text style={styles.welcomeTitle}>Guten Tag!</Text>
-            <Text style={styles.welcomeSubtitle}>Hier ist Ihr Bewerbungsüberblick</Text>
+            <Text style={styles.welcomeSubtitle}>
+              Hier ist Ihr Bewerbungsüberblick
+            </Text>
           </View>
 
           {/* Top Stats Row */}
@@ -251,7 +265,11 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
             >
               <View style={styles.weeklyHeader}>
                 <View style={styles.weeklyIconContainer}>
-                  <MaterialIcons name={weeklyStats.icon} size={24} color="white" />
+                  <MaterialIcons
+                    name={weeklyStats.icon}
+                    size={24}
+                    color="white"
+                  />
                 </View>
                 <View style={styles.weeklyTextContainer}>
                   <Text style={styles.weeklyValue}>{weeklyStats.value}</Text>
@@ -270,19 +288,21 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
           <View style={styles.chartCard}>
             <View style={styles.chartHeader}>
               <Text style={styles.chartTitle}>Wochenverlauf</Text>
-              <Text style={styles.chartSubtitle}>Bewerbungen der letzten 7 Tage</Text>
+              <Text style={styles.chartSubtitle}>
+                Bewerbungen der letzten 7 Tage
+              </Text>
             </View>
             <View style={styles.chartWrapper}>
               <View style={styles.chart}>
                 {weeklyChartData.map((day, index) => (
                   <View key={index} style={styles.chartBar}>
-                    <View 
+                    <View
                       style={[
-                        styles.bar, 
-                        { 
+                        styles.bar,
+                        {
                           height: day.height,
-                        }
-                      ]} 
+                        },
+                      ]}
                     >
                       <LinearGradient
                         colors={['#667eea', '#764ba2']}
@@ -291,9 +311,7 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                         end={{ x: 0, y: 1 }}
                       />
                     </View>
-                    <Text style={styles.chartDayLabel}>
-                      {day.day}
-                    </Text>
+                    <Text style={styles.chartDayLabel}>{day.day}</Text>
                   </View>
                 ))}
               </View>
@@ -320,18 +338,28 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                 <Ionicons name="chevron-forward" size={16} color="#667eea" />
               </TouchableOpacity>
             </View>
-            
+
             {applications.map((app, index) => (
-              <TouchableOpacity 
-                key={index} 
+              <TouchableOpacity
+                key={index}
                 style={styles.applicationCard}
                 onPress={() => openApplicationDetail(app)}
                 activeOpacity={0.7}
               >
                 <View style={styles.applicationContent}>
                   <View style={styles.applicationLeft}>
-                    <View style={[styles.statusBadge, { backgroundColor: app.statusColor }]}>
-                      <Ionicons name={app.statusIcon} size={14} color="white" style={styles.statusIcon} />
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: app.statusColor },
+                      ]}
+                    >
+                      <Ionicons
+                        name={app.statusIcon}
+                        size={14}
+                        color="white"
+                        style={styles.statusIcon}
+                      />
                       <Text style={styles.statusText}>{app.status}</Text>
                     </View>
                     <View style={styles.applicationInfo}>
@@ -341,7 +369,11 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                     </View>
                   </View>
                   <View style={styles.applicationRight}>
-                    <Ionicons name="chevron-forward" size={20} color="#c7c7cc" />
+                    <Ionicons
+                      name="chevron-forward"
+                      size={20}
+                      color="#c7c7cc"
+                    />
                   </View>
                 </View>
               </TouchableOpacity>
@@ -362,9 +394,21 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
               {/* Modal Header */}
               <View style={styles.detailModalHeader}>
                 <View style={styles.detailHeaderLeft}>
-                  <View style={[styles.detailStatusBadge, { backgroundColor: selectedApplication.statusColor }]}>
-                    <Ionicons name={selectedApplication.statusIcon} size={16} color="white" style={styles.detailStatusIcon} />
-                    <Text style={styles.detailStatusText}>{selectedApplication.status}</Text>
+                  <View
+                    style={[
+                      styles.detailStatusBadge,
+                      { backgroundColor: selectedApplication.statusColor },
+                    ]}
+                  >
+                    <Ionicons
+                      name={selectedApplication.statusIcon}
+                      size={16}
+                      color="white"
+                      style={styles.detailStatusIcon}
+                    />
+                    <Text style={styles.detailStatusText}>
+                      {selectedApplication.status}
+                    </Text>
                   </View>
                 </View>
                 <TouchableOpacity
@@ -376,10 +420,15 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
               </View>
 
               {/* Apartment Details */}
-              <ScrollView style={styles.detailScrollView} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={styles.detailScrollView}
+                showsVerticalScrollIndicator={false}
+              >
                 <View style={styles.detailContent}>
                   {/* Title */}
-                  <Text style={styles.detailTitle}>{selectedApplication.details.title}</Text>
+                  <Text style={styles.detailTitle}>
+                    {selectedApplication.details.title}
+                  </Text>
 
                   {/* Details Grid */}
                   <View style={styles.detailsGrid}>
@@ -388,7 +437,9 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                         <Ionicons name="location" size={20} color="#667eea" />
                         <Text style={styles.detailItemLabel}>Adresse</Text>
                       </View>
-                      <Text style={styles.detailItemValue}>{selectedApplication.details.fullAddress}</Text>
+                      <Text style={styles.detailItemValue}>
+                        {selectedApplication.details.fullAddress}
+                      </Text>
                     </View>
 
                     <View style={styles.detailItem}>
@@ -396,7 +447,9 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                         <Ionicons name="business" size={20} color="#667eea" />
                         <Text style={styles.detailItemLabel}>Bezirk</Text>
                       </View>
-                      <Text style={styles.detailItemValue}>{selectedApplication.details.bezirk}</Text>
+                      <Text style={styles.detailItemValue}>
+                        {selectedApplication.details.bezirk}
+                      </Text>
                     </View>
 
                     <View style={styles.detailItem}>
@@ -404,7 +457,9 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                         <Ionicons name="cash" size={20} color="#667eea" />
                         <Text style={styles.detailItemLabel}>Warmmiete</Text>
                       </View>
-                      <Text style={styles.detailItemValue}>{selectedApplication.details.warmmiete}</Text>
+                      <Text style={styles.detailItemValue}>
+                        {selectedApplication.details.warmmiete}
+                      </Text>
                     </View>
 
                     <View style={styles.detailItem}>
@@ -412,15 +467,25 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                         <Ionicons name="home" size={20} color="#667eea" />
                         <Text style={styles.detailItemLabel}>Zimmer</Text>
                       </View>
-                      <Text style={styles.detailItemValue}>{selectedApplication.details.zimmer}</Text>
+                      <Text style={styles.detailItemValue}>
+                        {selectedApplication.details.zimmer}
+                      </Text>
                     </View>
 
                     <View style={styles.detailItem}>
                       <View style={styles.detailItemHeader}>
-                        <Ionicons name="document-text" size={20} color="#667eea" />
-                        <Text style={styles.detailItemLabel}>WBS erforderlich</Text>
+                        <Ionicons
+                          name="document-text"
+                          size={20}
+                          color="#667eea"
+                        />
+                        <Text style={styles.detailItemLabel}>
+                          WBS erforderlich
+                        </Text>
                       </View>
-                      <Text style={styles.detailItemValue}>{selectedApplication.details.wbsErforderlich}</Text>
+                      <Text style={styles.detailItemValue}>
+                        {selectedApplication.details.wbsErforderlich}
+                      </Text>
                     </View>
 
                     <View style={styles.detailItem}>
@@ -428,7 +493,10 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                         <Ionicons name="link" size={20} color="#667eea" />
                         <Text style={styles.detailItemLabel}>URL</Text>
                       </View>
-                      <Text style={[styles.detailItemValue, styles.detailUrlText]} numberOfLines={2}>
+                      <Text
+                        style={[styles.detailItemValue, styles.detailUrlText]}
+                        numberOfLines={2}
+                      >
                         {selectedApplication.details.url}
                       </Text>
                     </View>
@@ -438,7 +506,10 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
                   <View style={styles.detailTimeContainer}>
                     <Ionicons name="time" size={16} color="#6B7280" />
                     <Text style={styles.detailTimeText}>
-                      {selectedApplication.status === 'beworben' ? 'Beworben' : 'Übersprungen'} {selectedApplication.time}
+                      {selectedApplication.status === 'beworben'
+                        ? 'Beworben'
+                        : 'Übersprungen'}{' '}
+                      {selectedApplication.time}
                     </Text>
                   </View>
                 </View>
@@ -455,7 +526,7 @@ function DashboardContent({ toggleTheme, isDarkMode }: { toggleTheme: () => void
 function DashboardWithTheme() {
   const colorScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(colorScheme === 'dark');
-  
+
   const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
 
   const toggleTheme = () => {
@@ -488,7 +559,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
   },
-  
+
   // Welcome Section
   welcomeSection: {
     marginBottom: 32,

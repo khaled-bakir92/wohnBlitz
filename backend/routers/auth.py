@@ -1,12 +1,27 @@
 import json
-from core.auth import get_current_active_user
-from core.schemas import BewerbungsprofilUpdate, Token, TokenRefresh, User, UserCreate, UserLogin
-from core.security import create_access_token, create_refresh_token, get_password_hash, verify_password, verify_token
-from database.database import get_db
-from models.user import User as UserModel
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
+from core.auth import get_current_active_user
+from core.schemas import (
+    BewerbungsprofilUpdate,
+    Token,
+    TokenRefresh,
+    User,
+    UserCreate,
+    UserLogin,
+)
+from core.security import (
+    create_access_token,
+    create_refresh_token,
+    get_password_hash,
+    verify_password,
+    verify_token,
+)
+from database.database import get_db
+from models.user import User as UserModel
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
@@ -18,6 +33,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email already registered")
 
     hashed_password = get_password_hash(user.password)
+
     db_user = UserModel(
         vorname=user.vorname,
         nachname=user.nachname,
@@ -45,7 +61,13 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
 
     access_token = create_access_token(data={"sub": user.email, "is_admin": user.is_admin})
     refresh_token = create_refresh_token(data={"sub": user.email, "is_admin": user.is_admin})
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "is_admin": user.is_admin, "profile_completed": user.profile_completed}
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "is_admin": user.is_admin,
+        "profile_completed": user.profile_completed,
+    }
 
 
 @router.post("/token", response_model=Token)
@@ -63,7 +85,13 @@ def login_for_access_token(
 
     access_token = create_access_token(data={"sub": user.email, "is_admin": user.is_admin})
     refresh_token = create_refresh_token(data={"sub": user.email, "is_admin": user.is_admin})
-    return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "is_admin": user.is_admin, "profile_completed": user.profile_completed}
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "is_admin": user.is_admin,
+        "profile_completed": user.profile_completed,
+    }
 
 
 @router.post("/refresh", response_model=Token)
@@ -72,7 +100,7 @@ def refresh_access_token(token_data: TokenRefresh, db: Session = Depends(get_db)
     try:
         # Verify the refresh token
         email = verify_token(token_data.refresh_token, token_type="refresh")
-        
+
         # Check if user exists and is active
         user = db.query(UserModel).filter(UserModel.email == email).first()
         if not user or not user.is_active:
@@ -81,16 +109,26 @@ def refresh_access_token(token_data: TokenRefresh, db: Session = Depends(get_db)
                 detail="User not found or inactive",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Create new tokens
-        access_token = create_access_token(data={"sub": user.email, "is_admin": user.is_admin})
-        refresh_token = create_refresh_token(data={"sub": user.email, "is_admin": user.is_admin})
-        
-        return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer", "is_admin": user.is_admin, "profile_completed": user.profile_completed}
-        
+        access_token = create_access_token(
+            data={"sub": user.email, "is_admin": user.is_admin}
+        )
+        refresh_token = create_refresh_token(
+            data={"sub": user.email, "is_admin": user.is_admin}
+        )
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "is_admin": user.is_admin,
+            "profile_completed": user.profile_completed,
+        }
+
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
@@ -102,10 +140,10 @@ def refresh_access_token(token_data: TokenRefresh, db: Session = Depends(get_db)
 def update_bewerbungsprofil(
     profil_data: BewerbungsprofilUpdate,
     current_user: UserModel = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update user's Bewerbungsprofil (application profile)"""
-    
+
     # Get existing bewerbungsprofil data or empty dict
     existing_profil = {}
     if current_user.bewerbungsprofil:
@@ -113,32 +151,30 @@ def update_bewerbungsprofil(
             existing_profil = json.loads(current_user.bewerbungsprofil)
         except json.JSONDecodeError:
             existing_profil = {}
-    
+
     # Update with new data (only include non-None values)
     profil_dict = profil_data.dict(exclude_none=True)
     existing_profil.update(profil_dict)
-    
+
     # Save updated profile as JSON string
     current_user.bewerbungsprofil = json.dumps(existing_profil, ensure_ascii=False)
-    
+
     # Mark profile as completed
     current_user.profile_completed = True
-    
+
     db.commit()
     db.refresh(current_user)
-    
+
     return current_user
 
 
 @router.get("/bewerbungsprofil")
-def get_bewerbungsprofil(
-    current_user: UserModel = Depends(get_current_active_user)
-):
+def get_bewerbungsprofil(current_user: UserModel = Depends(get_current_active_user)):
     """Get user's current Bewerbungsprofil"""
-    
+
     if not current_user.bewerbungsprofil:
         return {}
-    
+
     try:
         return json.loads(current_user.bewerbungsprofil)
     except json.JSONDecodeError:
@@ -146,9 +182,7 @@ def get_bewerbungsprofil(
 
 
 @router.get("/me", response_model=User)
-def get_current_user_info(
-    current_user: UserModel = Depends(get_current_active_user)
-):
+def get_current_user_info(current_user: UserModel = Depends(get_current_active_user)):
     """Get current user's information including admin status"""
     return current_user
 
@@ -157,17 +191,17 @@ def get_current_user_info(
 def update_filter_einstellungen(
     filter_data: dict,
     current_user: UserModel = Depends(get_current_active_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """Update user's filter settings"""
-    
+
     # Get the filter settings from the request
-    filter_einstellungen = filter_data.get('filter_einstellungen', '{}')
-    
+    filter_einstellungen = filter_data.get("filter_einstellungen", "{}")
+
     # Update the user's filter settings
     current_user.filter_einstellungen = filter_einstellungen
-    
+
     db.commit()
     db.refresh(current_user)
-    
+
     return current_user

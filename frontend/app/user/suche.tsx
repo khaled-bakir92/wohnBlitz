@@ -1,7 +1,22 @@
 import React, { useState, useEffect, Fragment } from 'react';
-import { StyleSheet, View, Animated, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Animated,
+  TouchableOpacity,
+  Dimensions,
+  ScrollView,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Surface, Button, Card, Portal, Provider, Divider } from 'react-native-paper';
+import {
+  Text,
+  Surface,
+  Button,
+  Card,
+  Portal,
+  Provider,
+  Divider,
+} from 'react-native-paper';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import WohnBlitzHeader from '@/user/WohnBlitzHeader';
@@ -26,7 +41,7 @@ export default function SearchScreen() {
     foundApartments: 0,
     checkedPortals: 0,
     lastUpdate: new Date(),
-    processedApartments: 0
+    processedApartments: 0,
   });
   const [searchHistory, setSearchHistory] = useState<SearchActivity[]>([
     {
@@ -34,24 +49,24 @@ export default function SearchScreen() {
       type: 'stop',
       timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
       duration: 45,
-      foundApartments: 12
+      foundApartments: 12,
     },
     {
       id: '2',
       type: 'stop',
       timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
       duration: 30,
-      foundApartments: 8
+      foundApartments: 8,
     },
     {
       id: '3',
       type: 'stop',
       timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
       duration: 20,
-      foundApartments: 5
-    }
+      foundApartments: 5,
+    },
   ]);
-  
+
   // Animation values
   const pulseAnim = new Animated.Value(1);
   const progressAnim = new Animated.Value(0);
@@ -74,7 +89,7 @@ export default function SearchScreen() {
           }),
         ])
       );
-      
+
       // Start progress animation (slower progress)
       const progressAnimation = Animated.timing(progressAnim, {
         toValue: 1,
@@ -89,7 +104,9 @@ export default function SearchScreen() {
       const durationInterval = setInterval(() => {
         if (searchStartTime) {
           const now = new Date();
-          const duration = Math.floor((now.getTime() - searchStartTime.getTime()) / 1000);
+          const duration = Math.floor(
+            (now.getTime() - searchStartTime.getTime()) / 1000
+          );
           setSearchDuration(duration);
         }
       }, 1000);
@@ -98,16 +115,19 @@ export default function SearchScreen() {
       const searchInterval = setInterval(() => {
         setSearchStats(prev => {
           // Only increment if we haven't reached the maximum
-          const newCheckedPortals = prev.checkedPortals < 8 
-            ? prev.checkedPortals + 1 
-            : prev.checkedPortals;
-          
+          const newCheckedPortals =
+            prev.checkedPortals < 8
+              ? prev.checkedPortals + 1
+              : prev.checkedPortals;
+
           return {
             ...prev,
-            foundApartments: prev.foundApartments + Math.floor(Math.random() * 2),
+            foundApartments:
+              prev.foundApartments + Math.floor(Math.random() * 2),
             checkedPortals: newCheckedPortals,
-            processedApartments: prev.processedApartments + Math.floor(Math.random() * 5) + 1,
-            lastUpdate: new Date()
+            processedApartments:
+              prev.processedApartments + Math.floor(Math.random() * 5) + 1,
+            lastUpdate: new Date(),
           };
         });
       }, 3000); // Slower update interval
@@ -128,20 +148,22 @@ export default function SearchScreen() {
 
   const toggleSearch = () => {
     const now = new Date();
-    
+
     if (isSearching) {
       // Stop search
-      const duration = searchStartTime ? Math.round((now.getTime() - searchStartTime.getTime()) / 1000 / 60) : 0;
+      const duration = searchStartTime
+        ? Math.round((now.getTime() - searchStartTime.getTime()) / 1000 / 60)
+        : 0;
       const newActivity: SearchActivity = {
         id: Date.now().toString(),
         type: 'stop',
         timestamp: now,
         duration,
-        foundApartments: searchStats.foundApartments
+        foundApartments: searchStats.foundApartments,
       };
-      
+
       setSearchHistory(prev => [newActivity, ...prev.slice(0, 4)]); // Keep only last 5
-      
+
       // Add notification for search completion
       addNotification({
         title: 'Suche beendet',
@@ -149,23 +171,23 @@ export default function SearchScreen() {
         type: 'success',
         isRead: false,
       });
-      
+
       setIsSearching(false);
       setSearchStartTime(null);
       setSearchStats({
         foundApartments: 0,
         checkedPortals: 0,
         processedApartments: 0,
-        lastUpdate: new Date()
+        lastUpdate: new Date(),
       });
     } else {
       // Start search
       const newActivity: SearchActivity = {
         id: Date.now().toString(),
         type: 'start',
-        timestamp: now
+        timestamp: now,
       };
-      
+
       setSearchHistory(prev => [newActivity, ...prev.slice(0, 4)]);
       setIsSearching(true);
       setSearchStartTime(now);
@@ -182,8 +204,8 @@ export default function SearchScreen() {
         style={[
           styles.searchButton,
           {
-            transform: [{ scale: pulseAnim }]
-          }
+            transform: [{ scale: pulseAnim }],
+          },
         ]}
       >
         <LinearGradient
@@ -201,7 +223,7 @@ export default function SearchScreen() {
             />
           </View>
         </LinearGradient>
-        
+
         {/* Ring animation for active state */}
         {isSearching && (
           <Animated.View
@@ -212,14 +234,19 @@ export default function SearchScreen() {
                 opacity: pulseAnim.interpolate({
                   inputRange: [1, 1.1],
                   outputRange: [0.3, 0],
-                })
-              }
+                }),
+              },
             ]}
           />
         )}
       </Animated.View>
-      
-      <Text style={[styles.buttonLabel, { color: isSearching ? '#ef4444' : '#3b82f6' }]}>
+
+      <Text
+        style={[
+          styles.buttonLabel,
+          { color: isSearching ? '#ef4444' : '#3b82f6' },
+        ]}
+      >
         {isSearching ? 'Suche stoppen' : 'Suche starten'}
       </Text>
     </TouchableOpacity>
@@ -229,7 +256,7 @@ export default function SearchScreen() {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${minutes}m ${secs}s`;
     } else if (minutes > 0) {
@@ -263,19 +290,25 @@ export default function SearchScreen() {
             <View style={styles.timeItem}>
               <Ionicons name="time" size={16} color="#10b981" />
               <Text style={styles.timeLabel}>Dauer:</Text>
-              <Text style={styles.timeValue}>{formatDuration(searchDuration)}</Text>
+              <Text style={styles.timeValue}>
+                {formatDuration(searchDuration)}
+              </Text>
             </View>
           </View>
         )}
-        
+
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{String(searchStats.foundApartments || 0)}</Text>
+            <Text style={styles.statNumber}>
+              {String(searchStats.foundApartments || 0)}
+            </Text>
             <Text style={styles.statLabel}>Beworbene Wohnungen</Text>
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{String(searchStats.processedApartments || 0)}</Text>
+            <Text style={styles.statNumber}>
+              {String(searchStats.processedApartments || 0)}
+            </Text>
             <Text style={styles.statLabel}>Anzeigen geprüft</Text>
           </View>
         </View>
@@ -291,7 +324,8 @@ export default function SearchScreen() {
         </View>
 
         <Text style={styles.lastUpdate}>
-          Letzte Aktualisierung: {searchStats.lastUpdate.toLocaleTimeString('de-DE')}
+          Letzte Aktualisierung:{' '}
+          {searchStats.lastUpdate.toLocaleTimeString('de-DE')}
         </Text>
       </Surface>
     </View>
@@ -301,40 +335,47 @@ export default function SearchScreen() {
     const renderHistoryItem = (activity: SearchActivity, index: number) => {
       const actionText = activity.type === 'start' ? 'gestartet' : 'gestoppt';
       const dateText = activity.timestamp.toLocaleDateString('de-DE');
-      const timeText = activity.timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
-      const statsText = activity.type === 'stop' && activity.duration 
-        ? `${activity.duration} Min. • ${activity.foundApartments || 0} Wohnungen gefunden`
-        : '';
+      const timeText = activity.timestamp.toLocaleTimeString('de-DE', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      const statsText =
+        activity.type === 'stop' && activity.duration
+          ? `${activity.duration} Min. • ${activity.foundApartments || 0} Wohnungen gefunden`
+          : '';
 
       return (
         <React.Fragment key={activity.id}>
           <View style={styles.historyItem}>
-            <View style={[
-              styles.historyIcon,
-              { backgroundColor: activity.type === 'start' ? '#dbeafe' : '#fee2e2' }
-            ]}>
+            <View
+              style={[
+                styles.historyIcon,
+                {
+                  backgroundColor:
+                    activity.type === 'start' ? '#dbeafe' : '#fee2e2',
+                },
+              ]}
+            >
               <Ionicons
                 name={activity.type === 'start' ? 'play' : 'stop'}
                 size={16}
                 color={activity.type === 'start' ? '#3b82f6' : '#ef4444'}
               />
             </View>
-            
+
             <View style={styles.historyDetails}>
-              <Text style={styles.historyAction}>
-                Suche {actionText}
-              </Text>
+              <Text style={styles.historyAction}>Suche {actionText}</Text>
               <Text style={styles.historyTime}>
                 {dateText} um {timeText}
               </Text>
               {statsText !== '' && (
-                <Text style={styles.historyStats}>
-                  {statsText}
-                </Text>
+                <Text style={styles.historyStats}>{statsText}</Text>
               )}
             </View>
           </View>
-          {index < searchHistory.length - 1 && <Divider style={styles.historyDivider} />}
+          {index < searchHistory.length - 1 && (
+            <Divider style={styles.historyDivider} />
+          )}
         </React.Fragment>
       );
     };
@@ -346,9 +387,14 @@ export default function SearchScreen() {
             <Ionicons name="time-outline" size={20} color="#6b7280" />
             <Text style={styles.historyTitle}>Letzte Aktivitäten</Text>
           </View>
-          
-          <ScrollView style={styles.historyList} showsVerticalScrollIndicator={false}>
-            {searchHistory.map((activity, index) => renderHistoryItem(activity, index))}
+
+          <ScrollView
+            style={styles.historyList}
+            showsVerticalScrollIndicator={false}
+          >
+            {searchHistory.map((activity, index) =>
+              renderHistoryItem(activity, index)
+            )}
           </ScrollView>
         </Card.Content>
       </Card>
@@ -357,8 +403,10 @@ export default function SearchScreen() {
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
     if (diffInHours < 1) return 'Gerade eben';
     if (diffInHours < 24) return `vor ${diffInHours} Std.`;
     const diffInDays = Math.floor(diffInHours / 24);
@@ -369,15 +417,18 @@ export default function SearchScreen() {
     <Provider>
       <View style={styles.container}>
         <WohnBlitzHeader />
-        
-        <ScrollView style={styles.contentContainer} showsVerticalScrollIndicator={false}>
+
+        <ScrollView
+          style={styles.contentContainer}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.content}>
             {/* Hero Section */}
             <View style={styles.heroSection}>
               <View style={styles.titleContainer}>
                 <Text style={styles.mainTitle}>Wohnungssuche</Text>
                 <Text style={styles.subtitle}>
-                  {isSearching 
+                  {isSearching
                     ? 'Durchsuche gerade alle verfügbaren Immobilienportale...'
                     : 'Automatische Suche nach Ihrer Traumwohnung'}
                 </Text>
@@ -405,19 +456,41 @@ export default function SearchScreen() {
                 <View style={styles.statsGrid}>
                   <View style={styles.statCard}>
                     <Text style={styles.statNumber}>
-                      {String(searchHistory?.filter(h => h?.type === 'stop')?.reduce((acc, h) => acc + (h?.foundApartments || 0), 0) || 0)}
+                      {String(
+                        searchHistory
+                          ?.filter(h => h?.type === 'stop')
+                          ?.reduce(
+                            (acc, h) => acc + (h?.foundApartments || 0),
+                            0
+                          ) || 0
+                      )}
                     </Text>
                     <Text style={styles.statLabel}>Wohnungen gefunden</Text>
                   </View>
                   <View style={styles.statCard}>
                     <Text style={styles.statNumber}>
-                      {String(searchHistory?.filter(h => h?.type === 'stop')?.length || 0)}
+                      {String(
+                        searchHistory?.filter(h => h?.type === 'stop')
+                          ?.length || 0
+                      )}
                     </Text>
                     <Text style={styles.statLabel}>Suchdurchläufe</Text>
                   </View>
                   <View style={styles.statCard}>
                     <Text style={styles.statNumber}>
-                      {String(Math.round((searchHistory?.filter(h => h?.type === 'stop')?.reduce((acc, h) => acc + (h?.duration || 0), 0) || 0) / Math.max(1, searchHistory?.filter(h => h?.type === 'stop')?.length || 1)))}
+                      {String(
+                        Math.round(
+                          (searchHistory
+                            ?.filter(h => h?.type === 'stop')
+                            ?.reduce((acc, h) => acc + (h?.duration || 0), 0) ||
+                            0) /
+                            Math.max(
+                              1,
+                              searchHistory?.filter(h => h?.type === 'stop')
+                                ?.length || 1
+                            )
+                        )
+                      )}
                     </Text>
                     <Text style={styles.statLabel}>Ø Min pro Suche</Text>
                   </View>

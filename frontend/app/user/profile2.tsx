@@ -91,7 +91,7 @@ export default function Profile2Screen({ onComplete }: Profile2FormProps = {}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.content}
       >
@@ -140,8 +140,11 @@ export default function Profile2Screen({ onComplete }: Profile2FormProps = {}) {
               />
             </View>
 
-            <TouchableOpacity 
-              style={[styles.weiterButton, isLoading && styles.weiterButtonDisabled]} 
+            <TouchableOpacity
+              style={[
+                styles.weiterButton,
+                isLoading && styles.weiterButtonDisabled,
+              ]}
               onPress={handleWeiter}
               disabled={isLoading}
             >

@@ -1,15 +1,14 @@
 import asyncio
-import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict
+
+from sqlalchemy import func
 
 from core.logging_config import bot_metrics, get_logger
 from database.database import SessionLocal
 from models.bewerbung import Bewerbung
 from models.bot_status import BotLog
-from services.immobilien_bot_manager import BotStatus, bot_manager
-from sqlalchemy import func
-from sqlalchemy.orm import Session
+from services.immobilien_bot_manager import bot_manager
 
 
 class BotMaintenanceService:
@@ -89,11 +88,6 @@ class BotMaintenanceService:
             cutoff_date = datetime.now() - timedelta(days=days_to_keep)
 
             db = SessionLocal()
-
-            # Zähle Logs vor dem Löschen
-            old_logs_count = (
-                db.query(BotLog).filter(BotLog.timestamp < cutoff_date).count()
-            )
 
             # Lösche alte Logs
             deleted_count = (

@@ -1,12 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Alert, FlatList, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  FlatList,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Text, Surface, Avatar, Modal, Portal, Button } from 'react-native-paper';
+import {
+  Text,
+  Surface,
+  Avatar,
+  Modal,
+  Portal,
+  Button,
+} from 'react-native-paper';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { ProfileService, BewerbungsprofilData } from '@/user/profileService';
 import WohnBlitzHeader from '@/user/WohnBlitzHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '@/constants/api';
 
 interface Message {
   id: string;
@@ -20,7 +38,8 @@ export default function ProfilScreen() {
   const [userEmail, setUserEmail] = useState<string>('');
   const [userName, setUserName] = useState<string>('Max Mustermann');
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [supportModalVisible, setSupportModalVisible] = useState<boolean>(false);
+  const [supportModalVisible, setSupportModalVisible] =
+    useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [isLoadingMessages, setIsLoadingMessages] = useState<boolean>(false);
@@ -36,27 +55,33 @@ export default function ProfilScreen() {
       if (!token) return;
 
       // First get conversations
-      const conversationsResponse = await fetch('http://localhost:8000/api/chat/conversations', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const conversationsResponse = await fetch(
+        `${API_BASE_URL}/api/chat/conversations`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (conversationsResponse.ok) {
         const conversations = await conversationsResponse.json();
-        
+
         if (conversations.length > 0) {
           // Get messages from the most recent conversation
           const latestConversation = conversations[0];
-          const messagesResponse = await fetch(`http://localhost:8000/api/chat/conversations/${latestConversation.id}/messages`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
+          const messagesResponse = await fetch(
+            `${API_BASE_URL}/api/chat/conversations/${latestConversation.id}/messages`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
 
           if (messagesResponse.ok) {
             const data = await messagesResponse.json();
@@ -65,10 +90,12 @@ export default function ProfilScreen() {
               text: msg.message,
               sender: msg.sender_type === 'user' ? 'user' : 'admin',
               timestamp: new Date(msg.created_at),
-              senderName: msg.sender_name
+              senderName: msg.sender_name,
             }));
             // Sort messages chronologically (oldest first) for normal chat display
-            const sortedMessages = formattedMessages.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+            const sortedMessages = formattedMessages.sort(
+              (a, b) => a.timestamp.getTime() - b.timestamp.getTime()
+            );
             setMessages(sortedMessages);
           }
         }
@@ -87,14 +114,14 @@ export default function ProfilScreen() {
       const token = await AsyncStorage.getItem('access_token');
       if (!token) return;
 
-      const response = await fetch('http://localhost:8000/api/chat/messages', {
+      const response = await fetch(`${API_BASE_URL}/api/chat/messages`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: newMessage.trim()
+          message: newMessage.trim(),
         }),
       });
 
@@ -105,7 +132,7 @@ export default function ProfilScreen() {
           text: newMessage.trim(),
           sender: 'user',
           timestamp: new Date(),
-          senderName: userName
+          senderName: userName,
         };
         setMessages(prev => [...prev, newMsg]);
         setNewMessage('');
@@ -124,7 +151,7 @@ export default function ProfilScreen() {
   const loadUserData = async () => {
     try {
       setIsLoading(true);
-      
+
       // Get user email from storage
       const email = await ProfileService.getUserEmail();
       if (email) {
@@ -145,29 +172,25 @@ export default function ProfilScreen() {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      'Abmelden',
-      'Möchten Sie sich wirklich abmelden?',
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
+    Alert.alert('Abmelden', 'Möchten Sie sich wirklich abmelden?', [
+      {
+        text: 'Abbrechen',
+        style: 'cancel',
+      },
+      {
+        text: 'Abmelden',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ProfileService.logout();
+            router.replace('/login');
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten.');
+          }
         },
-        {
-          text: 'Abmelden',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await ProfileService.logout();
-              router.replace('/login');
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten.');
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const menuItems = [
@@ -176,105 +199,108 @@ export default function ProfilScreen() {
       title: 'Datenschutz',
       icon: 'shield',
       iconColor: '#6b7280',
-      onPress: () => console.log('Datenschutz pressed')
+      onPress: () => console.log('Datenschutz pressed'),
     },
     {
       id: 2,
       title: 'Kontakt Support',
       icon: 'chat',
       iconColor: '#6b7280',
-      onPress: openSupportChat
+      onPress: openSupportChat,
     },
     {
       id: 3,
       title: 'Logout',
       icon: 'logout',
       iconColor: '#ef4444',
-      onPress: handleLogout
-    }
+      onPress: handleLogout,
+    },
   ];
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <WohnBlitzHeader />
-      
+
       <View style={styles.contentContainer}>
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-        {/* User Profile Header */}
-        <Surface style={[styles.profileHeader, { backgroundColor: 'white' }]} elevation={1}>
-          <View style={styles.profileInfo}>
-            <View style={styles.avatarContainer}>
-              <Avatar.Icon 
-                size={64} 
-                icon="account" 
-                style={styles.avatar}
-                color="#3b82f6"
-              />
-            </View>
-            
-            <View style={styles.userInfo}>
-              <Text variant="titleLarge" style={styles.userName}>
-                {userName}
-              </Text>
-              <Text variant="bodyMedium" style={styles.userEmail}>
-                {userEmail || 'Keine Email verfügbar'}
-              </Text>
-            </View>
-          </View>
-        </Surface>
-
-        {/* Einstellungen Section */}
-        <View style={styles.settingsSection}>
-          <Text variant="titleMedium" style={styles.sectionTitle}>
-            Einstellungen
-          </Text>
-          
-          <Surface style={[styles.menuContainer, { backgroundColor: 'white' }]} elevation={1}>
-            {menuItems.map((item, index) => (
-              <View key={item.id}>
-                <TouchableOpacity 
-                  style={styles.menuItem}
-                  onPress={item.onPress}
-                >
-                  <View style={styles.menuItemLeft}>
-                    <View style={styles.iconContainer}>
-                      <MaterialIcons 
-                        name={item.icon} 
-                        size={20} 
-                        color={item.iconColor} 
-                      />
-                    </View>
-                    
-                    <Text 
-                      variant="bodyLarge" 
-                      style={[
-                        styles.menuItemText,
-                        { color: item.iconColor }
-                      ]}
-                    >
-                      {item.title}
-                    </Text>
-                  </View>
-                  
-                  <MaterialIcons 
-                    name="chevron-right" 
-                    size={24} 
-                    color="#d1d5db" 
-                  />
-                </TouchableOpacity>
-                
-                {index < menuItems.length - 1 && (
-                  <View style={styles.divider} />
-                )}
+          {/* User Profile Header */}
+          <Surface
+            style={[styles.profileHeader, { backgroundColor: 'white' }]}
+            elevation={1}
+          >
+            <View style={styles.profileInfo}>
+              <View style={styles.avatarContainer}>
+                <Avatar.Icon
+                  size={64}
+                  icon="account"
+                  style={styles.avatar}
+                  color="#3b82f6"
+                />
               </View>
-            ))}
+
+              <View style={styles.userInfo}>
+                <Text variant="titleLarge" style={styles.userName}>
+                  {userName}
+                </Text>
+                <Text variant="bodyMedium" style={styles.userEmail}>
+                  {userEmail || 'Keine Email verfügbar'}
+                </Text>
+              </View>
+            </View>
           </Surface>
-        </View>
+
+          {/* Einstellungen Section */}
+          <View style={styles.settingsSection}>
+            <Text variant="titleMedium" style={styles.sectionTitle}>
+              Einstellungen
+            </Text>
+
+            <Surface
+              style={[styles.menuContainer, { backgroundColor: 'white' }]}
+              elevation={1}
+            >
+              {menuItems.map((item, index) => (
+                <View key={item.id}>
+                  <TouchableOpacity
+                    style={styles.menuItem}
+                    onPress={item.onPress}
+                  >
+                    <View style={styles.menuItemLeft}>
+                      <View style={styles.iconContainer}>
+                        <MaterialIcons
+                          name={item.icon}
+                          size={20}
+                          color={item.iconColor}
+                        />
+                      </View>
+
+                      <Text
+                        variant="bodyLarge"
+                        style={[styles.menuItemText, { color: item.iconColor }]}
+                      >
+                        {item.title}
+                      </Text>
+                    </View>
+
+                    <MaterialIcons
+                      name="chevron-right"
+                      size={24}
+                      color="#d1d5db"
+                    />
+                  </TouchableOpacity>
+
+                  {index < menuItems.length - 1 && (
+                    <View style={styles.divider} />
+                  )}
+                </View>
+              ))}
+            </Surface>
+          </View>
         </ScrollView>
       </View>
 
@@ -305,36 +331,61 @@ export default function ProfilScreen() {
                 </View>
               ) : messages.length === 0 ? (
                 <View style={styles.emptyContainer}>
-                  <Ionicons name="chatbubbles-outline" size={48} color="#9CA3AF" />
+                  <Ionicons
+                    name="chatbubbles-outline"
+                    size={48}
+                    color="#9CA3AF"
+                  />
                   <Text style={styles.emptyText}>Noch keine Nachrichten</Text>
-                  <Text style={styles.emptySubtext}>Stellen Sie Ihre erste Frage an unser Support-Team</Text>
+                  <Text style={styles.emptySubtext}>
+                    Stellen Sie Ihre erste Frage an unser Support-Team
+                  </Text>
                 </View>
               ) : (
                 <FlatList
                   data={messages}
-                  keyExtractor={(item) => item.id}
+                  keyExtractor={item => item.id}
                   style={styles.messagesList}
                   inverted={false}
                   renderItem={({ item }) => (
-                    <View style={[
-                      styles.messageItem,
-                      item.sender === 'user' ? styles.userMessage : styles.adminMessage
-                    ]}>
-                      <View style={[
-                        styles.messageBubble,
-                        item.sender === 'user' ? styles.userBubble : styles.adminBubble
-                      ]}>
-                        <Text style={[
-                          styles.messageText,
-                          item.sender === 'user' ? styles.userMessageText : styles.adminMessageText
-                        ]}>
+                    <View
+                      style={[
+                        styles.messageItem,
+                        item.sender === 'user'
+                          ? styles.userMessage
+                          : styles.adminMessage,
+                      ]}
+                    >
+                      <View
+                        style={[
+                          styles.messageBubble,
+                          item.sender === 'user'
+                            ? styles.userBubble
+                            : styles.adminBubble,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.messageText,
+                            item.sender === 'user'
+                              ? styles.userMessageText
+                              : styles.adminMessageText,
+                          ]}
+                        >
                           {item.text}
                         </Text>
-                        <Text style={[
-                          styles.messageTime,
-                          item.sender === 'user' ? styles.userMessageTime : styles.adminMessageTime
-                        ]}>
-                          {item.timestamp.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+                        <Text
+                          style={[
+                            styles.messageTime,
+                            item.sender === 'user'
+                              ? styles.userMessageTime
+                              : styles.adminMessageTime,
+                          ]}
+                        >
+                          {item.timestamp.toLocaleTimeString('de-DE', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </Text>
                       </View>
                       {item.sender === 'admin' && (
@@ -364,14 +415,17 @@ export default function ProfilScreen() {
                   maxLength={500}
                 />
                 <TouchableOpacity
-                  style={[styles.sendButton, !newMessage.trim() && styles.sendButtonDisabled]}
+                  style={[
+                    styles.sendButton,
+                    !newMessage.trim() && styles.sendButtonDisabled,
+                  ]}
                   onPress={sendSupportMessage}
                   disabled={!newMessage.trim()}
                 >
-                  <Ionicons 
-                    name="send" 
-                    size={20} 
-                    color={newMessage.trim() ? "#FFFFFF" : "#9CA3AF"} 
+                  <Ionicons
+                    name="send"
+                    size={20}
+                    color={newMessage.trim() ? '#FFFFFF' : '#9CA3AF'}
                   />
                 </TouchableOpacity>
               </View>

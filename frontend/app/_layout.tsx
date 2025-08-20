@@ -1,4 +1,8 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -11,6 +15,7 @@ import Toast from 'react-native-toast-message';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { NotificationProvider } from '@/shared/contexts/NotificationContext';
+import { UserProvider } from '@/shared/contexts/UserContext';
 import { useNotificationObserver } from '@/shared/hooks/useNotificationObserver';
 
 export default function RootLayout() {
@@ -33,22 +38,26 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PaperProvider theme={paperTheme}>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <NotificationProvider>
+          <UserProvider>
+            <ThemeProvider
+              value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+            >
+              <NotificationProvider>
               <BottomSheetModalProvider>
-              <Stack>
-                <Stack.Screen name="index" options={{ headerShown: false }} />
-                <Stack.Screen name="login" options={{ headerShown: false }} />
-                <Stack.Screen name="user" options={{ headerShown: false }} />
-                <Stack.Screen name="admin" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </BottomSheetModalProvider>
-          </NotificationProvider>
-        </ThemeProvider>
-      </PaperProvider>
-      <Toast />
-    </GestureHandlerRootView>
+                <Stack>
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="login" options={{ headerShown: false }} />
+                  <Stack.Screen name="user" options={{ headerShown: false }} />
+                  <Stack.Screen name="admin" options={{ headerShown: false }} />
+                  <Stack.Screen name="+not-found" />
+                </Stack>
+              </BottomSheetModalProvider>
+            </NotificationProvider>
+            </ThemeProvider>
+          </UserProvider>
+        </PaperProvider>
+        <Toast />
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   );
 }

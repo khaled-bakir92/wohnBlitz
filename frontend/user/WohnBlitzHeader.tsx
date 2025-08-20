@@ -1,28 +1,43 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert, Animated, Dimensions } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  Alert,
+  Animated,
+  Dimensions,
+} from 'react-native';
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Surface } from 'react-native-paper';
 import { router } from 'expo-router';
 import { ProfileService } from './profileService';
 import { useNotifications } from '@/shared/contexts/NotificationContext';
-import NotificationModal, { NotificationModalRef } from '@/shared/NotificationModal';
+import NotificationModal, {
+  NotificationModalRef,
+} from '@/shared/NotificationModal';
 
 interface WohnBlitzHeaderProps {
   onNotificationPress?: () => void;
   onProfilePress?: () => void;
 }
 
-export default function WohnBlitzHeader({ 
-  onNotificationPress, 
-  onProfilePress
+export default function WohnBlitzHeader({
+  onNotificationPress,
+  onProfilePress,
 }: WohnBlitzHeaderProps) {
   const insets = useSafeAreaInsets();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [menuAnimation] = useState(new Animated.Value(0));
   const notificationModalRef = useRef<NotificationModalRef>(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } =
+    useNotifications();
 
   const toggleProfileMenu = () => {
     if (showProfileMenu) {
@@ -43,29 +58,25 @@ export default function WohnBlitzHeader({
 
   const handleLogout = async () => {
     setShowProfileMenu(false);
-    Alert.alert(
-      'Abmelden',
-      'Möchten Sie sich wirklich abmelden?',
-      [
-        {
-          text: 'Abbrechen',
-          style: 'cancel',
+    Alert.alert('Abmelden', 'Möchten Sie sich wirklich abmelden?', [
+      {
+        text: 'Abbrechen',
+        style: 'cancel',
+      },
+      {
+        text: 'Abmelden',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await ProfileService.logout();
+            router.replace('/login');
+          } catch (error) {
+            console.error('Logout error:', error);
+            Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten.');
+          }
         },
-        {
-          text: 'Abmelden',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await ProfileService.logout();
-              router.replace('/login');
-            } catch (error) {
-              console.error('Logout error:', error);
-              Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten.');
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleSupport = () => {
@@ -84,10 +95,10 @@ export default function WohnBlitzHeader({
 
   const handleNotificationItemPress = (notification: any) => {
     console.log('Notification item pressed:', notification);
-    
+
     // Close the notification modal first
     notificationModalRef.current?.dismiss();
-    
+
     // Navigate to chat with the conversation ID
     if (notification.id) {
       router.push(`/user/chat/${notification.id}`);
@@ -104,11 +115,14 @@ export default function WohnBlitzHeader({
 
   return (
     <>
-      <StatusBar backgroundColor="rgba(43, 93, 111, 0.15)" barStyle="dark-content" />
+      <StatusBar
+        backgroundColor="rgba(43, 93, 111, 0.15)"
+        barStyle="dark-content"
+      />
       {showProfileMenu && (
-        <TouchableOpacity 
-          style={styles.overlay} 
-          activeOpacity={1} 
+        <TouchableOpacity
+          style={styles.overlay}
+          activeOpacity={1}
           onPress={() => setShowProfileMenu(false)}
         />
       )}
@@ -130,15 +144,15 @@ export default function WohnBlitzHeader({
 
             {/* Right side - Icons */}
             <View style={styles.rightSection}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.iconButton}
                 onPress={handleNotificationPress}
               >
                 <View style={styles.notificationContainer}>
-                  <MaterialIcons 
-                    name="notifications-none" 
-                    size={24} 
-                    color="#374151" 
+                  <MaterialIcons
+                    name="notifications-none"
+                    size={24}
+                    color="#374151"
                   />
                   {unreadCount > 0 && (
                     <View style={styles.notificationBadge}>
@@ -149,15 +163,15 @@ export default function WohnBlitzHeader({
                   )}
                 </View>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.iconButton}
                 onPress={handleProfileIconPress}
               >
-                <MaterialIcons 
-                  name="account-circle" 
-                  size={24} 
-                  color="#374151" 
+                <MaterialIcons
+                  name="account-circle"
+                  size={24}
+                  color="#374151"
                 />
               </TouchableOpacity>
             </View>
@@ -188,33 +202,49 @@ export default function WohnBlitzHeader({
               ]}
             >
               <Surface style={styles.menuSurface} elevation={8}>
-                <TouchableOpacity style={styles.menuItem} onPress={handleSupport}>
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleSupport}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
                       <MaterialIcons name="chat" size={20} color="#6b7280" />
                     </View>
                     <Text style={styles.menuItemText}>Kontakt Support</Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
-                
+
                 <View style={styles.menuDivider} />
-                
-                <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleLogout}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
                       <MaterialIcons name="logout" size={20} color="#ef4444" />
                     </View>
-                    <Text style={[styles.menuItemText, { color: '#ef4444' }]}>Logout</Text>
+                    <Text style={[styles.menuItemText, { color: '#ef4444' }]}>
+                      Logout
+                    </Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
               </Surface>
             </Animated.View>
           )}
         </View>
       </View>
-      
+
       <NotificationModal
         ref={notificationModalRef}
         notifications={notifications}

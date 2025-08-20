@@ -1,5 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Alert, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+  Alert,
+  Animated,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -16,16 +24,17 @@ interface UniversalHeaderProps {
   onProfilePress?: () => void;
 }
 
-export default function UniversalHeader({ 
+export default function UniversalHeader({
   isAdmin = false,
-  onNotificationPress, 
-  onProfilePress
+  onNotificationPress,
+  onProfilePress,
 }: UniversalHeaderProps) {
   const insets = useSafeAreaInsets();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [menuAnimation] = useState(new Animated.Value(0));
   const notificationModalRef = useRef<NotificationModalRef>(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearAll } =
+    useNotifications();
 
   const toggleProfileMenu = () => {
     if (showProfileMenu) {
@@ -67,7 +76,7 @@ export default function UniversalHeader({
                   'user_email',
                   'stay_logged_in',
                   'stored_email',
-                  'stored_password'
+                  'stored_password',
                 ]);
               } else {
                 // Regular user logout
@@ -76,7 +85,10 @@ export default function UniversalHeader({
               router.replace('/login');
             } catch (error) {
               console.error('Logout error:', error);
-              Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten.');
+              Alert.alert(
+                'Fehler',
+                'Beim Abmelden ist ein Fehler aufgetreten.'
+              );
             }
           },
         },
@@ -119,11 +131,14 @@ export default function UniversalHeader({
 
   return (
     <>
-      <StatusBar backgroundColor="rgba(43, 93, 111, 0.15)" barStyle="dark-content" />
+      <StatusBar
+        backgroundColor="rgba(43, 93, 111, 0.15)"
+        barStyle="dark-content"
+      />
       {showProfileMenu && (
-        <TouchableOpacity 
-          style={styles.overlay} 
-          activeOpacity={1} 
+        <TouchableOpacity
+          style={styles.overlay}
+          activeOpacity={1}
           onPress={() => setShowProfileMenu(false)}
         />
       )}
@@ -147,15 +162,15 @@ export default function UniversalHeader({
 
             {/* Right side - Icons */}
             <View style={styles.rightSection}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.iconButton}
                 onPress={handleNotificationPress}
               >
                 <View style={styles.notificationContainer}>
-                  <MaterialIcons 
-                    name="notifications-none" 
-                    size={24} 
-                    color="#374151" 
+                  <MaterialIcons
+                    name="notifications-none"
+                    size={24}
+                    color="#374151"
                   />
                   {unreadCount > 0 && (
                     <View style={styles.notificationBadge}>
@@ -166,15 +181,15 @@ export default function UniversalHeader({
                   )}
                 </View>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={styles.iconButton}
                 onPress={handleProfileIconPress}
               >
-                <MaterialIcons 
-                  name="account-circle" 
-                  size={24} 
-                  color="#374151" 
+                <MaterialIcons
+                  name="account-circle"
+                  size={24}
+                  color="#374151"
                 />
               </TouchableOpacity>
             </View>
@@ -207,19 +222,35 @@ export default function UniversalHeader({
               <Surface style={styles.menuSurface} elevation={8}>
                 {isAdmin && (
                   <>
-                    <TouchableOpacity style={styles.menuItem} onPress={handleSettings}>
+                    <TouchableOpacity
+                      style={styles.menuItem}
+                      onPress={handleSettings}
+                    >
                       <View style={styles.menuItemLeft}>
                         <View style={styles.menuIconContainer}>
-                          <MaterialIcons name="settings" size={20} color="#6b7280" />
+                          <MaterialIcons
+                            name="settings"
+                            size={20}
+                            color="#6b7280"
+                          />
                         </View>
-                        <Text style={styles.menuItemText}>Admin Einstellungen</Text>
+                        <Text style={styles.menuItemText}>
+                          Admin Einstellungen
+                        </Text>
                       </View>
-                      <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                      <MaterialIcons
+                        name="chevron-right"
+                        size={20}
+                        color="#d1d5db"
+                      />
                     </TouchableOpacity>
                   </>
                 )}
-                
-                <TouchableOpacity style={styles.menuItem} onPress={handleSupport}>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleSupport}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
                       <MaterialIcons name="chat" size={20} color="#6b7280" />
@@ -228,26 +259,39 @@ export default function UniversalHeader({
                       {isAdmin ? 'Admin Support' : 'Kontakt Support'}
                     </Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
-                
+
                 <View style={styles.menuDivider} />
-                
-                <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+
+                <TouchableOpacity
+                  style={styles.menuItem}
+                  onPress={handleLogout}
+                >
                   <View style={styles.menuItemLeft}>
                     <View style={styles.menuIconContainer}>
                       <MaterialIcons name="logout" size={20} color="#ef4444" />
                     </View>
-                    <Text style={[styles.menuItemText, { color: '#ef4444' }]}>Logout</Text>
+                    <Text style={[styles.menuItemText, { color: '#ef4444' }]}>
+                      Logout
+                    </Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={20} color="#d1d5db" />
+                  <MaterialIcons
+                    name="chevron-right"
+                    size={20}
+                    color="#d1d5db"
+                  />
                 </TouchableOpacity>
               </Surface>
             </Animated.View>
           )}
         </View>
       </View>
-      
+
       <NotificationModal
         ref={notificationModalRef}
         notifications={notifications}
