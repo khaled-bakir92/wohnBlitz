@@ -32,6 +32,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import UniversalHeader from '@/shared/UniversalHeader';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import { router } from 'expo-router';
 
 interface DashboardStats {
   total_users: number;
@@ -145,6 +146,39 @@ function AdminDashboardContent({
     }
   };
 
+  const fetchWithRetry = async (url: string, options: any, retries = 2) => {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // Shorter timeout per attempt
+        
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        // Don't retry on authentication errors (401)
+        if (response.status === 401) {
+          return response;
+        }
+        
+        return response;
+      } catch (error) {
+        if (i === retries) throw error;
+        
+        // Wait before retry (exponential backoff)
+        const delay = Math.pow(2, i) * 1000;
+        console.log(`Retry ${i + 1}/${retries + 1} for ${url} after ${delay}ms delay`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    
+    // This should never be reached, but TypeScript needs it
+    throw new Error('All retries failed');
+  };
+
   const fetchDashboardData = async (isRefresh = false) => {
     try {
       const token = await AsyncStorage.getItem('access_token');
@@ -169,25 +203,33 @@ function AdminDashboardContent({
       console.log(`${isRefresh ? 'Refreshing' : 'Fetching'} dashboard data with token...`);
       setConnectionError(false); // Reset error state on new attempt
 
-      // Fetch dashboard stats with timeout
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
       try {
-        const statsResponse = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/dashboard-stats`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          signal: controller.signal,
-        });
-          console.log('Stats response status:', statsResponse.status);
+        const statsResponse = await fetchWithRetry(
+          `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/dashboard-stats`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        console.log('Stats response status:', statsResponse.status);
 
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           console.log('Dashboard stats data:', JSON.stringify(statsData, null, 2));
           setDashboardData(statsData);
+        } else if (statsResponse.status === 401) {
+          // Token expired or invalid - stop auto refresh and redirect to login
+          console.log('Authentication failed - stopping auto refresh and redirecting to login');
+          stopAutoRefresh();
+          await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user_email']);
+          // Don't redirect immediately on refresh attempts, just stop trying
+          if (!isRefresh) {
+            router.replace('/login');
+          }
+          return; // Stop processing
         } else {
           const errorText = await statsResponse.text();
           console.error('Stats API error:', statsResponse.status, errorText);
@@ -204,9 +246,17 @@ function AdminDashboardContent({
           });
         }
       } catch (fetchError) {
-        clearTimeout(timeoutId);
-        console.error('Stats API fetch error:', fetchError);
-        setConnectionError(true);
+        console.error('Stats API fetch error after retries:', fetchError);
+        
+        // Check if it's an abort error (timeout)
+        if (fetchError.name === 'AbortError') {
+          console.log('Stats API request timed out after all retries');
+          setConnectionError(true);
+        } else {
+          console.error('Other fetch error:', fetchError.message);
+          setConnectionError(true);
+        }
+        
         // Set fallback data on fetch error (including timeout)
         setDashboardData({
           stats: {
@@ -220,20 +270,17 @@ function AdminDashboardContent({
         });
       }
 
-      // Fetch recent activities with timeout
-      const activitiesController = new AbortController();
-      const activitiesTimeoutId = setTimeout(() => activitiesController.abort(), 10000);
-
       try {
-        const activitiesResponse = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/recent-activities`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          signal: activitiesController.signal,
-        });
-        clearTimeout(activitiesTimeoutId);
+        const activitiesResponse = await fetchWithRetry(
+          `${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/recent-activities`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
         console.log('Activities response status:', activitiesResponse.status);
 
@@ -241,6 +288,15 @@ function AdminDashboardContent({
           const activitiesData = await activitiesResponse.json();
           console.log('Activities data:', JSON.stringify(activitiesData, null, 2));
           setActivitiesData(activitiesData.activities || []);
+        } else if (activitiesResponse.status === 401) {
+          // Token expired or invalid - stop auto refresh
+          console.log('Authentication failed on activities API - stopping auto refresh');
+          stopAutoRefresh();
+          await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user_email']);
+          if (!isRefresh) {
+            router.replace('/login');
+          }
+          return; // Stop processing
         } else {
           const errorText = await activitiesResponse.text();
           console.error('Activities API error:', activitiesResponse.status, errorText);
@@ -254,17 +310,30 @@ function AdminDashboardContent({
           }]);
         }
       } catch (fetchError) {
-        clearTimeout(activitiesTimeoutId);
-        console.error('Activities API fetch error:', fetchError);
-        setConnectionError(true);
-        // Set fallback activities on fetch error (including timeout)
-        setActivitiesData([{
-          activity: 'Netzwerk-Timeout - Daten konnten nicht geladen werden',
-          user: 'System',
-          time: 'Jetzt',
-          type: 'Fehler',
-          typeColor: '#ff3b30',
-        }]);
+        console.error('Activities API fetch error after retries:', fetchError);
+        
+        // Check if it's an abort error (timeout)
+        if (fetchError.name === 'AbortError') {
+          console.log('Activities API request timed out after all retries');
+          setConnectionError(true);
+          setActivitiesData([{
+            activity: 'Timeout - Aktivitäten konnten nicht geladen werden',
+            user: 'System',
+            time: 'Jetzt',
+            type: 'Fehler',
+            typeColor: '#ff3b30',
+          }]);
+        } else {
+          console.error('Other activities fetch error:', fetchError.message);
+          setConnectionError(true);
+          setActivitiesData([{
+            activity: 'Netzwerk-Fehler - Aktivitäten nicht verfügbar',
+            user: 'System',
+            time: 'Jetzt',
+            type: 'Fehler',
+            typeColor: '#ff3b30',
+          }]);
+        }
       }
 
     } catch (error) {
@@ -293,16 +362,19 @@ function AdminDashboardContent({
   };
 
   const startAutoRefresh = () => {
-    // Clear existing interval
+    // Re-enabled with optimized API and better interval
+    console.log('Auto-refresh enabled with optimized settings');
+    
+    // Clear existing interval if any
     if (autoRefreshInterval.current) {
       clearInterval(autoRefreshInterval.current);
     }
     
-    // Set up auto-refresh every 60 seconds (reduced frequency to prevent timeouts)
+    // Set up auto-refresh every 3 minutes (balanced approach)
     autoRefreshInterval.current = setInterval(() => {
       console.log('Auto-refreshing dashboard data...');
       fetchDashboardData(true);
-    }, 60000);
+    }, 180000); // 3 minutes - balanced between freshness and performance
   };
 
   const stopAutoRefresh = () => {

@@ -116,7 +116,7 @@ export default function WohnBlitzHeader({
   return (
     <>
       <StatusBar
-        backgroundColor="rgba(43, 93, 111, 0.15)"
+        backgroundColor="#f2f2f7"
         barStyle="dark-content"
       />
       {showProfileMenu && (
@@ -130,32 +130,29 @@ export default function WohnBlitzHeader({
         <View style={[styles.safeAreaTop, { height: insets.top }]} />
         <View style={styles.headerContainer}>
           <View style={styles.headerContent}>
-            {/* Left side - Logo and App Name */}
-            <View style={styles.leftSection}>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('@/assets/images/app-logo.png')}
-                  style={styles.logo}
-                  contentFit="contain"
-                />
-              </View>
-              <Text style={styles.appName}>WohnBlitz</Text>
+            {/* Center - Logo (Facebook style) */}
+            <View style={styles.centerSection}>
+              <Image
+                source={require('@/assets/images/logo2.png')}
+                style={styles.facebookLogo}
+                contentFit="contain"
+              />
             </View>
 
-            {/* Right side - Icons */}
+            {/* Right side - Icons (Facebook style) */}
             <View style={styles.rightSection}>
               <TouchableOpacity
-                style={styles.iconButton}
+                style={styles.cleanIconButton}
                 onPress={handleNotificationPress}
               >
                 <View style={styles.notificationContainer}>
                   <MaterialIcons
                     name="notifications-none"
-                    size={24}
-                    color="#374151"
+                    size={28}
+                    color="#000000"
                   />
                   {unreadCount > 0 && (
-                    <View style={styles.notificationBadge}>
+                    <View style={styles.facebookNotificationBadge}>
                       <Text style={styles.notificationText}>
                         {unreadCount > 99 ? '99+' : unreadCount.toString()}
                       </Text>
@@ -165,13 +162,13 @@ export default function WohnBlitzHeader({
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.iconButton}
+                style={styles.cleanIconButton}
                 onPress={handleProfileIconPress}
               >
                 <MaterialIcons
                   name="account-circle"
-                  size={24}
-                  color="#374151"
+                  size={28}
+                  color="#000000"
                 />
               </TouchableOpacity>
             </View>
@@ -268,75 +265,72 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   headerWithSafeArea: {
-    backgroundColor: 'rgba(43, 93, 111, 0.15)',
+    backgroundColor: '#f2f2f7', // App background color
     zIndex: 1000,
-    elevation: 5,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 1,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowRadius: 2,
   },
   safeAreaTop: {
-    backgroundColor: 'rgba(43, 93, 111, 0.15)',
+    backgroundColor: '#f2f2f7', // App background color
   },
   headerContainer: {
-    backgroundColor: 'rgba(43, 93, 111, 0.15)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(43, 93, 111, 0.3)',
+    backgroundColor: '#f2f2f7', // App background color
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#d1d5db',
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 8,
     minHeight: 56,
   },
-  leftSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  centerSection: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
-  logoContainer: {
-    marginRight: 8,
-  },
-  logo: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-  },
-  appName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1f2937',
-    letterSpacing: 0.5,
+  facebookLogo: {
+    width: 120,
+    height: 40,
+    resizeMode: 'contain',
   },
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  iconButton: {
-    padding: 8,
-    marginLeft: 4,
+  cleanIconButton: {
+    width: 40,
+    height: 40,
     borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   notificationContainer: {
     position: 'relative',
   },
-  notificationBadge: {
+  facebookNotificationBadge: {
     position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: '#ef4444',
+    top: -4,
+    right: -4,
+    backgroundColor: '#ff3040',
     borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    minWidth: 18,
+    height: 18,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 4,
+    borderWidth: 2,
+    borderColor: '#ffffff',
   },
   notificationText: {
     color: 'white',

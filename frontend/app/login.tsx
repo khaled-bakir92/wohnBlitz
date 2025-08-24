@@ -27,10 +27,6 @@ const WohnBlitzLogo = () => (
         contentFit="contain"
       />
     </View>
-    <Text style={styles.logoText}>
-      <Text style={styles.logoWohn}>Wohn</Text>
-      <Text style={styles.logoBlitz}>Blitzer</Text>
-    </Text>
   </View>
 );
 
@@ -360,7 +356,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: -50,
+    marginTop: 70,
   },
   logoContainer: {
     alignItems: 'center',
@@ -378,9 +374,9 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   appIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 16,
+    width: 160,
+    height: 160,
+    borderRadius: 32,
   },
   logoText: {
     fontSize: 28,

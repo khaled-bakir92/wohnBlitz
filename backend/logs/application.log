@@ -722,3 +722,13 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2025-08-24 20:54:43,816 - services.user_bot.UserBot.5 - INFO - Cleanup für User 5 abgeschlossen
 2025-08-24 20:54:43,816 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 5 erfolgreich gestoppt
 2025-08-24 20:54:51,533 - services.user_bot.UserBot.5 - INFO - Cleanup für User 5 abgeschlossen
+2025-08-24 22:10:28,191 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 22:10:51,969 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-24 22:45:18,124 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-24 22:45:18,125 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-24 22:45:20,198 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.

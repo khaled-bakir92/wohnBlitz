@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
-from sqlalchemy import func, and_
+from sqlalchemy import func
 
 from core.auth import get_current_admin_user
 from core.schemas import User, UserCreate
@@ -22,7 +22,7 @@ admin_router = APIRouter(prefix="/api/admin", tags=["admin-dashboard"])
 
 
 @router.get("/", response_model=List[User])
-def get_all_users(
+async def get_all_users(
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
 ):
@@ -31,7 +31,7 @@ def get_all_users(
 
 
 @router.post("/", response_model=User)
-def create_user(
+async def create_user(
     user: UserCreate,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -67,9 +67,17 @@ class UserCreateResponse(BaseModel):
     generated_password: str
     message: str
 
+class DashboardStatsResponse(BaseModel):
+    stats: dict = Field(..., description="Dashboard statistics")
+    weekly_chart_data: List[dict] = Field(default_factory=list, description="Weekly chart data")
+
+
+class ActivityResponse(BaseModel):
+    activities: List[dict] = Field(default_factory=list, description="Recent activities")
+
 
 @router.post("/create-with-email")
-def create_user_with_email(
+async def create_user_with_email(
     email_data: EmailCreate,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -151,7 +159,7 @@ def create_user_with_email(
 
 
 @router.get("/{user_id}", response_model=User)
-def get_user(
+async def get_user(
     user_id: int,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -163,7 +171,7 @@ def get_user(
 
 
 @router.put("/{user_id}", response_model=User)
-def update_user(
+async def update_user(
     user_id: int,
     user_update: UserCreate,
     db: Session = Depends(get_db),
@@ -185,7 +193,7 @@ def update_user(
 
 
 @router.delete("/{user_id}")
-def delete_user(
+async def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -291,7 +299,7 @@ def delete_user(
 
 
 @router.put("/{user_id}/admin")
-def toggle_admin_status(
+async def toggle_admin_status(
     user_id: int,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -310,7 +318,7 @@ def toggle_admin_status(
 
 
 @router.put("/{user_id}/toggle-status")
-def toggle_user_status(
+async def toggle_user_status(
     user_id: int,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -323,7 +331,6 @@ def toggle_user_status(
     if user.id == current_admin.id:
         raise HTTPException(status_code=400, detail="Cannot change your own status")
 
-    old_status = user.is_active
     user.is_active = not user.is_active
     user.updated_at = datetime.now()
     db.commit()
@@ -331,7 +338,7 @@ def toggle_user_status(
     
     # Log activity
     activity_type = ActivityType.USER_BLOCKED if not user.is_active else ActivityType.USER_UNBLOCKED
-    log_admin_activity(
+    await log_admin_activity(
         db, 
         activity_type.value, 
         user.id, 
@@ -346,7 +353,7 @@ def toggle_user_status(
 
 
 @router.put("/{user_id}/reset-password")
-def reset_user_password(
+async def reset_user_password(
     user_id: int,
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
@@ -382,7 +389,7 @@ def reset_user_password(
 
 
 @router.post("/test-email")
-def test_email_configuration(
+async def test_email_configuration(
     current_admin: UserModel = Depends(get_current_admin_user),
 ):
     """Admin: Testet die E-Mail-Konfiguration"""
@@ -407,8 +414,8 @@ def test_email_configuration(
         }
 
 
-@admin_router.get("/dashboard-stats")
-def get_admin_dashboard_stats(
+@admin_router.get("/dashboard-stats", response_model=DashboardStatsResponse)
+async def get_admin_dashboard_stats(
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
 ):
@@ -416,66 +423,83 @@ def get_admin_dashboard_stats(
     try:
         print("Starting dashboard stats query...")
         
-        # Alle Benutzer (statt nur aktive)
-        total_users = db.query(UserModel).count()
+        # Use optimized queries with indexes
+        # Alle Benutzer (statt nur aktive) - mit Index optimization
+        total_users = db.query(func.count(UserModel.id)).scalar() or 0
         print(f"Total users: {total_users}")
 
-        # Laufende Bots
+        # Laufende Bots - mit Index optimization
         try:
-            running_bots = db.query(BotStatus).filter(BotStatus.status == "running").count()
+            running_bots = db.query(func.count(BotStatus.id)).filter(
+                BotStatus.status == "running"
+            ).scalar() or 0
             print(f"Running bots: {running_bots}")
         except Exception as e:
             print(f"Error querying bot status: {e}")
             running_bots = 0
 
-        # Anzahl Bewerbungen letzte 24 Stunden (statt eine Woche)
+        # Anzahl Bewerbungen letzte 24 Stunden - optimized
         twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
         try:
-            daily_applications = db.query(BewerbungModel).filter(
+            daily_applications = db.query(func.count(BewerbungModel.id)).filter(
                 BewerbungModel.bewerbungsdatum >= twenty_four_hours_ago
-            ).count()
+            ).scalar() or 0
             print(f"Daily applications: {daily_applications}")
         except Exception as e:
             print(f"Error querying applications: {e}")
             daily_applications = 0
 
-        # Blockierte Benutzer
-        blocked_users = db.query(UserModel).filter(UserModel.is_active == False).count()
+        # Blockierte Benutzer - optimized
+        blocked_users = db.query(func.count(UserModel.id)).filter(
+            UserModel.is_active is False
+        ).scalar() or 0
         print(f"Blocked users: {blocked_users}")
 
-        # Neue Registrierungen diese Woche
+        # Neue Registrierungen diese Woche - optimized
         one_week_ago = datetime.now() - timedelta(days=7)
-        weekly_registrations = db.query(UserModel).filter(
+        weekly_registrations = db.query(func.count(UserModel.id)).filter(
             UserModel.created_at >= one_week_ago
-        ).count()
+        ).scalar() or 0
         print(f"Weekly registrations: {weekly_registrations}")
 
-        # Wochenstatistiken für Chart - Benutzer und gesendete Bewerbungen
+        # Wochenstatistiken für Chart - optimized bulk query
         weekly_chart_data = []
         try:
+            # Optimized approach: get all data in fewer queries
+            week_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=6)
+            
+            # Bulk query for users with date grouping
+            user_counts = db.query(
+                func.date(UserModel.created_at).label('date'),
+                func.count(UserModel.id).label('count')
+            ).filter(
+                UserModel.created_at >= week_start
+            ).group_by(func.date(UserModel.created_at)).all()
+            
+            # Convert to dict for faster lookup
+            user_count_dict = {str(row.date): row.count for row in user_counts}
+            
+            # Bulk query for applications with date grouping
+            app_count_dict = {}
+            try:
+                app_counts = db.query(
+                    func.date(BewerbungModel.bewerbungsdatum).label('date'),
+                    func.count(BewerbungModel.id).label('count')
+                ).filter(
+                    BewerbungModel.bewerbungsdatum >= week_start
+                ).group_by(func.date(BewerbungModel.bewerbungsdatum)).all()
+                
+                app_count_dict = {str(row.date): row.count for row in app_counts}
+            except Exception as e:
+                print(f"Error querying bulk applications: {e}")
+            
+            # Build chart data from cached results
             for i in range(7):
                 day_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=i)
-                day_end = day_start + timedelta(days=1)
+                day_key = str(day_start.date())
                 
-                # Neue Benutzer diesen Tag
-                users_count = db.query(UserModel).filter(
-                    and_(
-                        UserModel.created_at >= day_start,
-                        UserModel.created_at < day_end
-                    )
-                ).count()
-                
-                # Gesendete Bewerbungen diesen Tag
-                try:
-                    applications_count = db.query(BewerbungModel).filter(
-                        and_(
-                            BewerbungModel.bewerbungsdatum >= day_start,
-                            BewerbungModel.bewerbungsdatum < day_end
-                        )
-                    ).count()
-                except Exception as e:
-                    print(f"Error querying daily applications for {day_start}: {e}")
-                    applications_count = 0
+                users_count = user_count_dict.get(day_key, 0)
+                applications_count = app_count_dict.get(day_key, 0)
                 
                 weekday = day_start.strftime('%a')
                 day_name_mapping = {
@@ -514,7 +538,7 @@ def get_admin_dashboard_stats(
         raise HTTPException(status_code=500, detail=f"Error getting dashboard stats: {str(e)}")
 
 
-def log_admin_activity(db: Session, activity_type: str, user_id: int = None, user_email: str = None, description: str = ""):
+async def log_admin_activity(db: Session, activity_type: str, user_id: int = None, user_email: str = None, description: str = ""):
     """Helper function to log admin activities"""
     try:
         activity = AdminActivity(
@@ -529,9 +553,9 @@ def log_admin_activity(db: Session, activity_type: str, user_id: int = None, use
         print(f"Error logging admin activity: {e}")
 
 
-@admin_router.get("/recent-activities")
-def get_recent_activities(
-    limit: int = Query(10, ge=1, le=50),
+@admin_router.get("/recent-activities", response_model=ActivityResponse)
+async def get_recent_activities(
+    limit: int = Query(10, ge=1, le=20), # Reduced max limit for performance
     db: Session = Depends(get_db),
     current_admin: UserModel = Depends(get_current_admin_user),
 ):
@@ -544,10 +568,10 @@ def get_recent_activities(
         one_week_ago = datetime.now() - timedelta(days=7)
         print(f"Looking for activities since: {one_week_ago}")
         
-        # Neue Registrierungen
+        # Optimized: Neue Registrierungen with index hints
         new_users = db.query(UserModel).filter(
             UserModel.created_at >= one_week_ago
-        ).order_by(UserModel.created_at.desc()).limit(10).all()
+        ).order_by(UserModel.created_at.desc()).limit(5).all() # Reduced to 5 for performance
         
         for user in new_users:
             time_diff = datetime.now() - user.created_at
