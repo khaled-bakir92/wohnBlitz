@@ -491,3 +491,234 @@ AttributeError: module 'bcrypt' has no attribute '__about__'
 2025-08-14 16:08:04,946 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
 2025-08-14 16:08:04,947 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
 2025-08-14 16:09:03,299 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:22:26,023 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:23:21,559 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-22 16:34:14,183 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-22 16:34:14,183 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-22 16:34:14,184 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-22 16:34:14,184 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-22 16:34:14,184 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-22 16:34:22,309 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-22 16:34:22,310 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-22 16:34:22,310 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-22 16:34:35,084 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-22 16:34:35,098 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 10 Angebote
+2025-08-22 16:34:35,293 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau (1-7851/3/104)
+2025-08-22 16:34:35,457 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-22 16:34:35,912 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: *WBS 180* 3-Zimmer-Wohnung in Spandau (1-7851/2/72)
+2025-08-22 16:34:35,912 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 3
+2025-08-22 16:34:35,926 - services.immobilien_crawler.Crawler.8 - INFO - Bearbeite Angebot für User 8: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau (https://www.wbm.de/wohnungen-berlin/angebote/details/2-zi-wohnung-mit-balkon-wbs-180-in-spandau/)
+2025-08-22 16:34:45,289 - services.immobilien_crawler.Crawler.8 - INFO - Formular für User 8 erfolgreich abgesendet: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau
+2025-08-22 16:34:45,294 - services.email_service.EmailService - WARNING - E-Mail kann nicht gesendet werden an khaled132112@gmail.com. SMTP-Konfiguration unvollständig.
+2025-08-22 16:34:45,300 - services.user_bot.UserBot.8 - ERROR - Fehler beim Verarbeiten der Bewerbung für User 8: Instance <Bewerbung at 0x104500320> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2025-08-22 16:34:48,821 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-22 16:34:48,937 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-22 16:34:48,937 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-22 16:34:48,937 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-22 16:34:54,040 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-22 16:39:32,839 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:40:52,057 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:41:57,554 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:42:20,590 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:42:20,780 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-22 16:42:20,780 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-22 16:43:13,977 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:43:14,176 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-22 16:43:14,176 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-22 16:43:51,196 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:44:15,258 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:44:15,457 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-22 16:44:15,457 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-22 16:44:51,671 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-22 16:45:09,185 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-22 16:45:09,185 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-22 16:45:09,191 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-22 16:45:09,191 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-22 16:45:09,191 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-22 16:45:12,739 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-22 16:45:12,739 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-22 16:45:12,739 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-22 16:45:25,278 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-22 16:45:25,308 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 10 Angebote
+2025-08-22 16:45:25,494 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau (1-7851/3/104)
+2025-08-22 16:45:25,645 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-22 16:45:26,081 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: *WBS 180* 3-Zimmer-Wohnung in Spandau (1-7851/2/72)
+2025-08-22 16:45:26,081 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 3
+2025-08-22 16:45:26,083 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau - Ashdodstrasse 6, 13587 Berlin
+2025-08-22 16:45:37,178 - services.immobilien_crawler.Crawler.8 - INFO - Bearbeite Angebot für User 8: Erdgeschoss 3-Zimmer-Wohnung in Spandau (https://www.wbm.de/wohnungen-berlin/angebote/details/erdgeschoss-3-zimmer-wohnung-in-spandau/)
+2025-08-22 16:45:38,528 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-22 16:45:38,623 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-22 16:45:38,623 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-22 16:45:38,623 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-22 16:45:39,884 - services.immobilien_crawler.Crawler.8 - ERROR - Allgemeiner Fehler bei der Formularverarbeitung für User 8: 'NoneType' object has no attribute 'find_element'
+2025-08-22 16:45:39,888 - services.email_service.EmailService - WARNING - E-Mail kann nicht gesendet werden an khaled132112@gmail.com. SMTP-Konfiguration unvollständig.
+2025-08-22 16:45:39,892 - services.user_bot.UserBot.8 - ERROR - Fehler beim Verarbeiten der Bewerbung für User 8: Instance <Bewerbung at 0x10412fda0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2025-08-22 16:45:39,894 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-22 16:49:05,119 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-22 16:49:05,123 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-22 16:49:13,396 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-22 16:59:30,521 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-22 16:59:30,522 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-22 16:59:30,529 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-22 16:59:30,529 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-22 16:59:30,529 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-22 16:59:34,248 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-22 16:59:34,249 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-22 16:59:34,249 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-22 16:59:47,850 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-22 16:59:47,880 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 10 Angebote
+2025-08-22 16:59:48,073 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau (1-7851/3/104)
+2025-08-22 16:59:48,222 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-22 16:59:48,668 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: *WBS 180* 3-Zimmer-Wohnung in Spandau (1-7851/2/72)
+2025-08-22 16:59:48,668 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 3
+2025-08-22 16:59:48,674 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: 2-Zi-Wohnung mit Balkon *WBS 180* in Spandau - Ashdodstrasse 6, 13587 Berlin
+2025-08-22 17:00:00,237 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: Erdgeschoss 3-Zimmer-Wohnung in Spandau - Asnièresstrasse 5, 13587 Berlin
+2025-08-22 17:00:04,900 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-22 17:00:05,004 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-22 17:00:05,004 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-22 17:00:05,004 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-22 17:00:05,920 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 14:51:51,841 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 14:51:52,041 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-24 14:51:52,042 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-24 14:53:47,200 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 14:54:56,926 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-24 15:02:29,174 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 15:02:29,411 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-24 15:02:29,411 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-24 15:10:11,087 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-24 15:10:11,088 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-24 15:10:11,094 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-24 15:10:11,095 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-24 15:10:11,095 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-24 15:10:22,097 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-24 15:10:22,098 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-24 15:10:22,098 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-24 15:10:33,000 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-24 15:10:33,011 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 7 Angebote
+2025-08-24 15:10:33,268 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-24 15:10:33,565 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-24 15:10:33,579 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: Erdgeschoss 3-Zimmer-Wohnung in Spandau - Asnièresstrasse 5, 13587 Berlin
+2025-08-24 15:10:46,501 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-24 15:10:46,606 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-24 15:10:46,606 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 15:10:46,606 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-24 15:10:47,177 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 15:12:42,260 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-24 15:12:42,261 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-24 15:12:42,266 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-24 15:12:42,266 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-24 15:12:42,267 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-24 15:12:45,629 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-24 15:12:45,629 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-24 15:12:45,629 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-24 15:12:57,624 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-24 15:12:57,654 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 7 Angebote
+2025-08-24 15:12:57,926 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-24 15:12:58,209 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-24 15:12:58,213 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: Erdgeschoss 3-Zimmer-Wohnung in Spandau - Asnièresstrasse 5, 13587 Berlin
+2025-08-24 15:13:12,244 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-24 15:13:12,360 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-24 15:13:12,360 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 15:13:12,360 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-24 15:28:20,160 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 15:28:41,858 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-24 15:35:17,648 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-24 15:35:17,648 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-24 15:35:19,399 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 15:35:35,191 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-24 15:36:13,324 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-24 15:36:13,324 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-24 15:36:13,325 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-24 15:36:13,325 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-24 15:36:13,325 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-24 15:36:16,639 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-24 15:36:16,639 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-24 15:36:16,640 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-24 15:36:28,853 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-24 15:36:28,882 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 7 Angebote
+2025-08-24 15:36:29,257 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-24 15:36:29,610 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-24 15:36:29,627 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: Erdgeschoss 3-Zimmer-Wohnung in Spandau - Asnièresstrasse 5, 13587 Berlin
+2025-08-24 15:36:46,641 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-24 15:36:46,753 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-24 15:36:46,753 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 15:36:46,753 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-24 15:46:01,516 - services.user_bot.UserBot.8 - INFO - User-Konfiguration für 8 geladen
+2025-08-24 15:46:01,517 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestartet
+2025-08-24 15:46:01,517 - services.user_bot.UserBot.8 - INFO - Bot für User 8 gestartet
+2025-08-24 15:46:01,517 - services.user_bot.UserBot.8 - INFO - Initialisiere Crawler für User 8...
+2025-08-24 15:46:01,517 - services.immobilien_crawler.Crawler.8 - INFO - Initialisiere Browser für User 8...
+2025-08-24 15:46:04,304 - services.immobilien_crawler.Crawler.8 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-24 15:46:04,305 - services.user_bot.UserBot.8 - INFO - Crawler für User 8 erfolgreich initialisiert
+2025-08-24 15:46:04,305 - services.immobilien_crawler.Crawler.8 - INFO - Überprüfe auf neue Angebote für User 8: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-24 15:46:16,293 - services.immobilien_crawler.Crawler.8 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-24 15:46:16,313 - services.immobilien_crawler.Crawler.8 - INFO - Gefunden: 7 Angebote
+2025-08-24 15:46:16,660 - services.immobilien_crawler.Crawler.8 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-24 15:46:16,997 - services.immobilien_crawler.Crawler.8 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-24 15:46:16,999 - services.user_bot.UserBot.8 - INFO - Bewerbung bereits vorhanden für User 8: Erdgeschoss 3-Zimmer-Wohnung in Spandau - Asnièresstrasse 5, 13587 Berlin
+2025-08-24 15:46:32,669 - services.user_bot.UserBot.8 - INFO - Stoppe Bot für User 8
+2025-08-24 15:46:32,783 - services.immobilien_crawler.Crawler.8 - INFO - Browser-Cleanup für User 8 abgeschlossen
+2025-08-24 15:46:32,783 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 15:46:32,783 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 8 erfolgreich gestoppt
+2025-08-24 15:51:36,044 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 16:01:31,846 - services.user_bot.UserBot.8 - INFO - Cleanup für User 8 abgeschlossen
+2025-08-24 20:37:41,052 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 20:38:26,602 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-24 20:38:26,605 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-24 20:38:52,044 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 20:42:26,229 - services.immobilien_bot_manager.BotManager - INFO - Stoppe alle aktiven Bots...
+2025-08-24 20:42:26,229 - services.immobilien_bot_manager.BotManager - INFO - Alle Bots gestoppt
+2025-08-24 20:42:27,469 - services.email_service.EmailService - WARNING - E-Mail-Konfiguration unvollständig. Setzen Sie SMTP_USERNAME und SMTP_PASSWORD als Umgebungsvariablen.
+2025-08-24 20:43:30,803 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/khaled/Desktop/Projekt/Wohnblitzer/backend/venv/lib/python3.12/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-08-24 20:54:17,552 - services.user_bot.UserBot.5 - INFO - User-Konfiguration für 5 geladen
+2025-08-24 20:54:17,552 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 5 erfolgreich gestartet
+2025-08-24 20:54:17,553 - services.user_bot.UserBot.5 - INFO - Bot für User 5 gestartet
+2025-08-24 20:54:17,553 - services.user_bot.UserBot.5 - INFO - Initialisiere Crawler für User 5...
+2025-08-24 20:54:17,553 - services.immobilien_crawler.Crawler.5 - INFO - Initialisiere Browser für User 5...
+2025-08-24 20:54:21,700 - services.immobilien_crawler.Crawler.5 - INFO - Browser mit automatisch erkanntem ChromeDriver initialisiert
+2025-08-24 20:54:21,700 - services.user_bot.UserBot.5 - INFO - Crawler für User 5 erfolgreich initialisiert
+2025-08-24 20:54:21,700 - services.immobilien_crawler.Crawler.5 - INFO - Überprüfe auf neue Angebote für User 5: https://www.wbm.de/wohnungen-berlin/angebote/
+2025-08-24 20:54:33,562 - services.immobilien_crawler.Crawler.5 - INFO - Kein Cookie-Banner gefunden oder bereits akzeptiert
+2025-08-24 20:54:33,590 - services.immobilien_crawler.Crawler.5 - INFO - Gefunden: 7 Angebote
+2025-08-24 20:54:33,856 - services.immobilien_crawler.Crawler.5 - INFO - Neues gefiltertes Angebot gefunden: Erdgeschoss 3-Zimmer-Wohnung in Spandau (1-7850/3/52)
+2025-08-24 20:54:34,143 - services.immobilien_crawler.Crawler.5 - INFO - Neue gefilterte Angebote gefunden: 1
+2025-08-24 20:54:34,157 - services.immobilien_crawler.Crawler.5 - INFO - Bearbeite Angebot für User 5: Erdgeschoss 3-Zimmer-Wohnung in Spandau (https://www.wbm.de/wohnungen-berlin/angebote/details/erdgeschoss-3-zimmer-wohnung-in-spandau/)
+2025-08-24 20:54:43,323 - services.immobilien_crawler.Crawler.5 - INFO - Formular für User 5 erfolgreich abgesendet: Erdgeschoss 3-Zimmer-Wohnung in Spandau
+2025-08-24 20:54:43,325 - services.email_service.EmailService - WARNING - E-Mail kann nicht gesendet werden an khaled@gmail.com. SMTP-Konfiguration unvollständig.
+2025-08-24 20:54:43,328 - services.user_bot.UserBot.5 - ERROR - Fehler beim Verarbeiten der Bewerbung für User 5: Instance <Bewerbung at 0x10507bbf0> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+2025-08-24 20:54:43,694 - services.user_bot.UserBot.5 - INFO - Stoppe Bot für User 5
+2025-08-24 20:54:43,816 - services.immobilien_crawler.Crawler.5 - INFO - Browser-Cleanup für User 5 abgeschlossen
+2025-08-24 20:54:43,816 - services.user_bot.UserBot.5 - INFO - Cleanup für User 5 abgeschlossen
+2025-08-24 20:54:43,816 - services.immobilien_bot_manager.BotManager - INFO - Bot für User 5 erfolgreich gestoppt
+2025-08-24 20:54:51,533 - services.user_bot.UserBot.5 - INFO - Cleanup für User 5 abgeschlossen

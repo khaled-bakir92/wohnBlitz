@@ -45,6 +45,21 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+    
+    # Log registration activity
+    try:
+        from models.admin_activity import AdminActivity, ActivityType
+        activity = AdminActivity(
+            activity_type=ActivityType.USER_REGISTERED.value,
+            user_id=db_user.id,
+            user_email=db_user.email,
+            description=f"Neuer Benutzer registriert: {db_user.vorname} {db_user.nachname}"
+        )
+        db.add(activity)
+        db.commit()
+    except Exception as e:
+        print(f"Error logging registration activity: {e}")
+    
     return db_user
 
 

@@ -24,6 +24,10 @@ logger = get_logger("main")
 user.Base.metadata.create_all(bind=engine)
 chat.Base.metadata.create_all(bind=engine)
 
+# AdminActivity Tabelle erstellen
+from models import admin_activity
+admin_activity.Base.metadata.create_all(bind=engine)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -70,6 +74,7 @@ app.add_middleware(
 # API Routers
 app.include_router(auth.router)
 app.include_router(admin.router)
+app.include_router(admin.admin_router)  # New admin dashboard router
 app.include_router(bewerbungen.router)
 app.include_router(statistiken.router)
 app.include_router(nachrichten.router)

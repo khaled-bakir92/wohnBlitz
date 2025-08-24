@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   ScrollView,
   View,
   TouchableOpacity,
   Dimensions,
+  RefreshControl,
 } from 'react-native';
 import {
   SafeAreaProvider,
@@ -23,11 +24,43 @@ import {
   IconButton,
   useTheme,
   Badge,
+  ActivityIndicator,
 } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import UniversalHeader from '@/shared/UniversalHeader';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
+
+interface DashboardStats {
+  total_users: number;
+  running_bots: number;
+  daily_applications: number;
+  blocked_users: number;
+  weekly_registrations: number;
+}
+
+interface ChartDataPoint {
+  day: string;
+  users: number;
+  applications: number;
+  userHeight: number;
+  appHeight: number;
+}
+
+interface Activity {
+  activity: string;
+  user: string;
+  time: string;
+  type: string;
+  typeColor: string;
+}
+
+interface DashboardData {
+  stats: DashboardStats;
+  weekly_chart_data: ChartDataPoint[];
+}
 
 // Admin Dashboard Component
 function AdminDashboardContent({
@@ -39,92 +72,346 @@ function AdminDashboardContent({
 }) {
   const insets = useSafeAreaInsets();
   const theme = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [activitiesData, setActivitiesData] = useState<Activity[]>([]);
+  const [connectionError, setConnectionError] = useState(false);
+  const autoRefreshInterval = useRef<number | null>(null);
 
+  const getActivityBadgeStyle = (type: string) => {
+    switch (type) {
+      case 'Registrierung':
+        return {
+          backgroundColor: '#e8f5e8',
+          borderWidth: 1,
+          borderColor: '#34c759',
+        };
+      case 'Bot Aktivität':
+        return {
+          backgroundColor: '#e6f3ff',
+          borderWidth: 1,
+          borderColor: '#007aff',
+        };
+      case 'Moderation':
+        return {
+          backgroundColor: '#ffe6e6',
+          borderWidth: 1,
+          borderColor: '#ff3b30',
+        };
+      case 'Bewerbung':
+        return {
+          backgroundColor: '#fff3e6',
+          borderWidth: 1,
+          borderColor: '#ff9500',
+        };
+      case 'Fehler':
+        return {
+          backgroundColor: '#ffe6e6',
+          borderWidth: 1,
+          borderColor: '#ff3b30',
+        };
+      case 'Info':
+        return {
+          backgroundColor: '#f0f0f0',
+          borderWidth: 1,
+          borderColor: '#86868b',
+        };
+      default:
+        return {
+          backgroundColor: '#f0f0f0',
+          borderWidth: 1,
+          borderColor: '#86868b',
+        };
+    }
+  };
+
+  const getActivityTextStyle = (type: string) => {
+    switch (type) {
+      case 'Registrierung':
+        return { color: '#1e7e1e' };
+      case 'Bot Aktivität':
+        return { color: '#0056b3' };
+      case 'Moderation':
+        return { color: '#cc2e2e' };
+      case 'Bewerbung':
+        return { color: '#cc7a00' };
+      case 'Fehler':
+        return { color: '#cc2e2e' };
+      case 'Info':
+        return { color: '#555555' };
+      default:
+        return { color: '#555555' };
+    }
+  };
+
+  const fetchDashboardData = async (isRefresh = false) => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        console.error('No auth token found');
+        // Set fallback data if no token
+        setDashboardData({
+          stats: {
+            total_users: 0,
+            running_bots: 0,
+            daily_applications: 0,
+            blocked_users: 0,
+            weekly_registrations: 0
+          },
+          weekly_chart_data: []
+        });
+        setActivitiesData([]);
+        if (!isRefresh) setLoading(false);
+        return;
+      }
+
+      console.log(`${isRefresh ? 'Refreshing' : 'Fetching'} dashboard data with token...`);
+      setConnectionError(false); // Reset error state on new attempt
+
+      // Fetch dashboard stats with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+      try {
+        const statsResponse = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/dashboard-stats`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          signal: controller.signal,
+        });
+          console.log('Stats response status:', statsResponse.status);
+
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          console.log('Dashboard stats data:', JSON.stringify(statsData, null, 2));
+          setDashboardData(statsData);
+        } else {
+          const errorText = await statsResponse.text();
+          console.error('Stats API error:', statsResponse.status, errorText);
+          // Set fallback data auch bei API-Fehler
+          setDashboardData({
+            stats: {
+              total_users: 0,
+              running_bots: 0,
+              daily_applications: 0,
+              blocked_users: 0,
+              weekly_registrations: 0
+            },
+            weekly_chart_data: []
+          });
+        }
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        console.error('Stats API fetch error:', fetchError);
+        setConnectionError(true);
+        // Set fallback data on fetch error (including timeout)
+        setDashboardData({
+          stats: {
+            total_users: 0,
+            running_bots: 0,
+            daily_applications: 0,
+            blocked_users: 0,
+            weekly_registrations: 0
+          },
+          weekly_chart_data: []
+        });
+      }
+
+      // Fetch recent activities with timeout
+      const activitiesController = new AbortController();
+      const activitiesTimeoutId = setTimeout(() => activitiesController.abort(), 10000);
+
+      try {
+        const activitiesResponse = await fetch(`${process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8000'}/api/admin/recent-activities`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          signal: activitiesController.signal,
+        });
+        clearTimeout(activitiesTimeoutId);
+
+        console.log('Activities response status:', activitiesResponse.status);
+
+        if (activitiesResponse.ok) {
+          const activitiesData = await activitiesResponse.json();
+          console.log('Activities data:', JSON.stringify(activitiesData, null, 2));
+          setActivitiesData(activitiesData.activities || []);
+        } else {
+          const errorText = await activitiesResponse.text();
+          console.error('Activities API error:', activitiesResponse.status, errorText);
+          // Set fallback activities
+          setActivitiesData([{
+            activity: 'Keine aktuellen Aktivitäten',
+            user: 'System',
+            time: 'Jetzt',
+            type: 'Info',
+            typeColor: '#86868b',
+          }]);
+        }
+      } catch (fetchError) {
+        clearTimeout(activitiesTimeoutId);
+        console.error('Activities API fetch error:', fetchError);
+        setConnectionError(true);
+        // Set fallback activities on fetch error (including timeout)
+        setActivitiesData([{
+          activity: 'Netzwerk-Timeout - Daten konnten nicht geladen werden',
+          user: 'System',
+          time: 'Jetzt',
+          type: 'Fehler',
+          typeColor: '#ff3b30',
+        }]);
+      }
+
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      // Set fallback data on error
+      setDashboardData({
+        stats: {
+          total_users: 0,
+          running_bots: 0,
+          daily_applications: 0,
+          blocked_users: 0,
+          weekly_registrations: 0
+        },
+        weekly_chart_data: []
+      });
+      setActivitiesData([]);
+    } finally {
+      if (!isRefresh) setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchDashboardData(true);
+    setRefreshing(false);
+  };
+
+  const startAutoRefresh = () => {
+    // Clear existing interval
+    if (autoRefreshInterval.current) {
+      clearInterval(autoRefreshInterval.current);
+    }
+    
+    // Set up auto-refresh every 60 seconds (reduced frequency to prevent timeouts)
+    autoRefreshInterval.current = setInterval(() => {
+      console.log('Auto-refreshing dashboard data...');
+      fetchDashboardData(true);
+    }, 60000);
+  };
+
+  const stopAutoRefresh = () => {
+    if (autoRefreshInterval.current) {
+      clearInterval(autoRefreshInterval.current);
+      autoRefreshInterval.current = null;
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // Auto-refresh when screen is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('Admin dashboard focused - starting auto refresh');
+      startAutoRefresh();
+      // Refresh data immediately when screen becomes focused
+      fetchDashboardData(true);
+
+      return () => {
+        console.log('Admin dashboard unfocused - stopping auto refresh');
+        stopAutoRefresh();
+      };
+    }, [])
+  );
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      stopAutoRefresh();
+    };
+  }, []);
+
+  // Create stats data from API response with fallback
   const statsData = [
     {
-      title: 'Aktive Benutzer',
-      value: '142',
-      gradient: ['#667eea', '#764ba2'],
-      icon: 'people',
-      subtitle: 'Online Benutzer',
+      title: 'Alle Benutzer',
+      value: dashboardData?.stats.total_users?.toString() || '0',
+      gradient: ['#667eea', '#764ba2'] as const,
+      icon: 'people' as const,
+      subtitle: 'Registrierte Benutzer',
     },
     {
       title: 'Laufende Bots',
-      value: '8',
-      gradient: ['#f093fb', '#f5576c'],
-      icon: 'smart-toy',
+      value: dashboardData?.stats.running_bots?.toString() || '0',
+      gradient: ['#f093fb', '#f5576c'] as const,
+      icon: 'smart-toy' as const,
       subtitle: 'Aktiv suchend',
     },
   ];
 
   const secondRowStats = [
     {
-      title: 'Anzahl Bewerbungen',
-      value: '1,247',
-      gradient: ['#4facfe', '#00f2fe'],
-      icon: 'description',
-      subtitle: 'Diese Woche',
+      title: 'Bewerbungen (24h)',
+      value: dashboardData?.stats.daily_applications?.toString() || '0',
+      gradient: ['#4facfe', '#00f2fe'] as const,
+      icon: 'description' as const,
+      subtitle: 'Letzte 24 Stunden',
     },
     {
       title: 'Blockierte Benutzer',
-      value: '12',
-      gradient: ['#ff9a9e', '#fecfef'],
-      icon: 'block',
+      value: dashboardData?.stats.blocked_users?.toString() || '0',
+      gradient: ['#ff9a9e', '#fecfef'] as const,
+      icon: 'block' as const,
       subtitle: 'Gesperrt',
     },
   ];
 
   const weeklyStats = {
     title: 'Diese Woche',
-    value: '89',
+    value: dashboardData?.stats.weekly_registrations?.toString() || '0',
     subtitle: 'Neue Registrierungen',
-    gradient: ['#4facfe', '#00f2fe'],
-    icon: 'trending-up',
-    change: '+23',
+    gradient: ['#4facfe', '#00f2fe'] as const,
+    icon: 'trending-up' as const,
+    change: '+' + (dashboardData?.stats.weekly_registrations?.toString() || '0'),
     changeType: 'increase',
   };
 
-  // Weekly chart data for Users & Applications
-  const weeklyChartData = [
-    { day: 'Mo', users: 12, applications: 45, userHeight: 48, appHeight: 72 },
-    { day: 'Di', users: 18, applications: 62, userHeight: 72, appHeight: 100 },
-    { day: 'Mi', users: 8, applications: 38, userHeight: 32, appHeight: 61 },
-    { day: 'Do', users: 15, applications: 71, userHeight: 60, appHeight: 114 },
-    { day: 'Fr', users: 22, applications: 54, userHeight: 88, appHeight: 86 },
-    { day: 'Sa', users: 6, applications: 29, userHeight: 24, appHeight: 46 },
-    { day: 'So', users: 4, applications: 18, userHeight: 16, appHeight: 29 },
+  // Use real chart data from API with fallback
+  const weeklyChartData = dashboardData?.weekly_chart_data || [
+    { day: 'Mo', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
+    { day: 'Di', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
+    { day: 'Mi', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
+    { day: 'Do', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
+    { day: 'Fr', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
+    { day: 'Sa', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
+    { day: 'So', users: 0, applications: 0, userHeight: 8, appHeight: 8 },
   ];
 
-  const recentActivities = [
+  const recentActivities = activitiesData.length > 0 ? activitiesData : [
     {
-      activity: 'Neue Benutzer Registrierung',
-      user: 'max.mueller@email.com',
-      time: 'vor 5 Minuten',
-      type: 'Registrierung',
-      typeColor: '#34c759',
-    },
-    {
-      activity: 'Bot gestartet',
-      user: 'anna.schmidt@email.com',
-      time: 'vor 12 Minuten',
-      type: 'Bot Aktivität',
-      typeColor: '#007aff',
-    },
-    {
-      activity: 'Bewerbung versendet',
-      user: 'thomas.weber@email.com',
-      time: 'vor 18 Minuten',
-      type: 'Bewerbung',
-      typeColor: '#ff9500',
-    },
-    {
-      activity: 'Benutzer blockiert',
-      user: 'spam.user@email.com',
-      time: 'vor 1 Stunde',
-      type: 'Moderation',
-      typeColor: '#ff3b30',
+      activity: 'Keine aktuellen Aktivitäten',
+      user: 'System',
+      time: 'Jetzt',
+      type: 'Info',
+      typeColor: '#86868b',
     },
   ];
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#667eea" />
+        <Text style={{ marginTop: 16, fontSize: 16, color: '#86868b' }}>Lade Dashboard...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -140,13 +427,43 @@ function AdminDashboardContent({
             { paddingBottom: Math.max(insets.bottom, 100) },
           ]}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#667eea']}
+              tintColor={'#667eea'}
+              title="Dashboard aktualisieren..."
+              titleColor={'#667eea'}
+            />
+          }
         >
           {/* Welcome Section */}
           <View style={styles.welcomeSection}>
-            <Text style={styles.welcomeTitle}>Admin Dashboard</Text>
-            <Text style={styles.welcomeSubtitle}>
-              System Übersicht und Statistiken
-            </Text>
+            <View style={styles.titleRow}>
+              <View>
+                <Text style={styles.welcomeTitle}>Admin Dashboard</Text>
+                <Text style={styles.welcomeSubtitle}>
+                  System Übersicht und Statistiken
+                </Text>
+              </View>
+              <View style={styles.statusIndicators}>
+                <View style={styles.refreshIndicator}>
+                  <View style={[styles.autoRefreshDot, { backgroundColor: autoRefreshInterval.current ? '#34c759' : '#86868b' }]} />
+                  <Text style={styles.autoRefreshText}>
+                    Auto-Refresh {autoRefreshInterval.current ? 'An' : 'Aus'}
+                  </Text>
+                </View>
+                {connectionError && (
+                  <View style={[styles.refreshIndicator, { backgroundColor: 'rgba(255, 59, 48, 0.1)' }]}>
+                    <View style={[styles.autoRefreshDot, { backgroundColor: '#ff3b30' }]} />
+                    <Text style={[styles.autoRefreshText, { color: '#ff3b30' }]}>
+                      Verbindungsfehler
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
           </View>
 
           {/* Top Stats Row */}
@@ -196,89 +513,93 @@ function AdminDashboardContent({
           </View>
 
           {/* Weekly Stats Card */}
-          <View style={styles.weeklyStatsCard}>
-            <LinearGradient
-              colors={weeklyStats.gradient}
-              style={styles.weeklyGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <View style={styles.weeklyHeader}>
-                <View style={styles.weeklyIconContainer}>
-                  <MaterialIcons
-                    name={weeklyStats.icon}
-                    size={24}
-                    color="white"
-                  />
+          {weeklyStats && (
+            <View style={styles.weeklyStatsCard}>
+              <LinearGradient
+                colors={weeklyStats.gradient}
+                style={styles.weeklyGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                <View style={styles.weeklyHeader}>
+                  <View style={styles.weeklyIconContainer}>
+                    <MaterialIcons
+                      name={weeklyStats.icon}
+                      size={24}
+                      color="white"
+                    />
+                  </View>
+                  <View style={styles.weeklyTextContainer}>
+                    <Text style={styles.weeklyValue}>{weeklyStats.value}</Text>
+                    <Text style={styles.weeklyTitle}>{weeklyStats.title}</Text>
+                  </View>
+                  <View style={styles.weeklyChangeContainer}>
+                    <Text style={styles.weeklyChange}>{weeklyStats.change}</Text>
+                    <Ionicons name="trending-up" size={16} color="white" />
+                  </View>
                 </View>
-                <View style={styles.weeklyTextContainer}>
-                  <Text style={styles.weeklyValue}>{weeklyStats.value}</Text>
-                  <Text style={styles.weeklyTitle}>{weeklyStats.title}</Text>
-                </View>
-                <View style={styles.weeklyChangeContainer}>
-                  <Text style={styles.weeklyChange}>{weeklyStats.change}</Text>
-                  <Ionicons name="trending-up" size={16} color="white" />
-                </View>
-              </View>
-              <Text style={styles.weeklySubtitle}>{weeklyStats.subtitle}</Text>
-            </LinearGradient>
-          </View>
+                <Text style={styles.weeklySubtitle}>{weeklyStats.subtitle}</Text>
+              </LinearGradient>
+            </View>
+          )}
 
           {/* Weekly Chart */}
-          <View style={styles.chartCard}>
-            <View style={styles.chartHeader}>
-              <Text style={styles.chartTitle}>Wochenstatistik</Text>
-              <Text style={styles.chartSubtitle}>
-                Benutzer & Bewerbungen der letzten 7 Tage
-              </Text>
-            </View>
-            <View style={styles.chartLegend}>
-              <View style={styles.legendItem}>
-                <View
-                  style={[styles.legendColor, { backgroundColor: '#667eea' }]}
-                />
-                <Text style={styles.legendText}>Benutzer</Text>
+          {weeklyChartData && weeklyChartData.length > 0 && (
+            <View style={styles.chartCard}>
+              <View style={styles.chartHeader}>
+                <Text style={styles.chartTitle}>Wochenstatistik</Text>
+                <Text style={styles.chartSubtitle}>
+                  Benutzer & Bewerbungen der letzten 7 Tage
+                </Text>
               </View>
-              <View style={styles.legendItem}>
-                <View
-                  style={[styles.legendColor, { backgroundColor: '#f093fb' }]}
-                />
-                <Text style={styles.legendText}>Bewerbungen</Text>
+              <View style={styles.chartLegend}>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[styles.legendColor, { backgroundColor: '#667eea' }]}
+                  />
+                  <Text style={styles.legendText}>Benutzer</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View
+                    style={[styles.legendColor, { backgroundColor: '#f093fb' }]}
+                  />
+                  <Text style={styles.legendText}>Bewerbungen</Text>
+                </View>
               </View>
-            </View>
-            <View style={styles.chartWrapper}>
-              <View style={styles.chart}>
-                {weeklyChartData.map((day, index) => (
-                  <View key={index} style={styles.chartBar}>
-                    <View style={styles.barGroup}>
-                      <View
-                        style={[
-                          styles.bar,
-                          {
-                            height: day.userHeight,
-                            backgroundColor: '#667eea',
-                            marginRight: 2,
-                            width: 12,
-                          },
-                        ]}
-                      />
-                      <View
-                        style={[
-                          styles.bar,
-                          {
-                            height: day.appHeight,
-                            backgroundColor: '#f093fb',
-                            width: 12,
-                          },
-                        ]}
-                      />
+              <View style={styles.chartWrapper}>
+                <View style={styles.chart}>
+                  {weeklyChartData.map((day, index) => (
+                    <View key={index} style={styles.chartBar}>
+                      <View style={styles.barGroup}>
+                        <View
+                          style={[
+                            styles.bar,
+                            {
+                              height: day.userHeight,
+                              backgroundColor: '#667eea',
+                              marginRight: 2,
+                              width: 12,
+                            },
+                          ]}
+                        />
+                        <View
+                          style={[
+                            styles.bar,
+                            {
+                              height: day.appHeight,
+                              backgroundColor: '#f093fb',
+                              width: 12,
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.chartDayLabel}>{day.day}</Text>
                     </View>
-                    <Text style={styles.chartDayLabel}>{day.day}</Text>
-                  </View>
-                ))}
+                  ))}
+                </View>
               </View>
             </View>
-          </View>
+          )}
 
           {/* System Status */}
           <View style={styles.quickActionsCard}>
@@ -301,17 +622,17 @@ function AdminDashboardContent({
               </TouchableOpacity>
             </View>
 
-            {recentActivities.map((activity, index) => (
+            {recentActivities && recentActivities.map((activity: Activity, index: number) => (
               <TouchableOpacity key={index} style={styles.applicationCard}>
                 <View style={styles.applicationContent}>
                   <View style={styles.applicationLeft}>
                     <View
                       style={[
                         styles.statusBadge,
-                        { backgroundColor: activity.typeColor },
+                        getActivityBadgeStyle(activity.type),
                       ]}
                     >
-                      <Text style={styles.statusText}>{activity.type}</Text>
+                      <Text style={[styles.statusText, getActivityTextStyle(activity.type)]}>{activity.type}</Text>
                     </View>
                     <View style={styles.applicationInfo}>
                       <Text style={styles.companyName}>
@@ -385,6 +706,11 @@ const styles = StyleSheet.create({
   welcomeSection: {
     marginBottom: 32,
   },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
   welcomeTitle: {
     fontSize: 34,
     fontWeight: '700',
@@ -395,6 +721,30 @@ const styles = StyleSheet.create({
     fontSize: 17,
     color: '#86868b',
     fontWeight: '400',
+  },
+  statusIndicators: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: 8,
+  },
+  refreshIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  autoRefreshDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  autoRefreshText: {
+    fontSize: 12,
+    color: '#667eea',
+    fontWeight: '500',
   },
 
   // Top Stats Row
@@ -633,9 +983,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   statusText: {
-    fontSize: 15,
-    color: '#34c759',
-    fontWeight: '500',
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 
   // Activities Section
@@ -691,6 +1041,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
     marginRight: 14,
+    minWidth: 80,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   applicationInfo: {
     flex: 1,

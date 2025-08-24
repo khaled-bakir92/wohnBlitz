@@ -399,27 +399,52 @@ function BotManagementContent({
                             {user.current_action}
                           </Text>
                         )}
-                        <Text style={styles.botStats}>
-                          Bewerbungen: {user.applications_sent} | Anzeigen: {user.listings_found}
-                        </Text>
+                        
+                        {/* Bot Stats Row */}
+                        <View style={styles.botStatsRow}>
+                          <View style={styles.statsContainer}>
+                            <View style={styles.statItem}>
+                              <Ionicons name="document-text" size={14} color="#86868b" />
+                              <Text style={styles.statText}>{user.applications_sent}</Text>
+                            </View>
+                            <View style={styles.statDivider} />
+                            <View style={styles.statItem}>
+                              <Ionicons name="eye" size={14} color="#86868b" />
+                              <Text style={styles.statText}>{user.listings_found}</Text>
+                            </View>
+                          </View>
+                        </View>
                       </View>
                     </View>
 
                     {/* Bot Status & Controls */}
                     <View style={styles.userRight}>
-                      <View style={styles.botStatusContainer}>
+                      <View style={styles.botControlsContainer}>
+                        {/* Bot Status Badge */}
                         <View
                           style={[
-                            styles.botStatusBadge,
+                            styles.modernStatusBadge,
                             {
-                              backgroundColor: getBotStatusColor(
-                                user.bot_status
-                              ),
+                              borderColor: getBotStatusColor(user.bot_status),
                             },
                           ]}
                         >
-                          <View style={styles.statusDot} />
-                          <Text style={styles.botStatusText}>
+                          <View
+                            style={[
+                              styles.modernStatusDot,
+                              {
+                                backgroundColor: getBotStatusColor(user.bot_status),
+                              },
+                            ]}
+                          />
+                          <Text
+                            style={[
+                              styles.modernStatusText,
+                              {
+                                color: getBotStatusColor(user.bot_status),
+                              },
+                            ]}
+                          >
                             {getBotStatusText(user.bot_status)}
                           </Text>
                         </View>
@@ -427,13 +452,13 @@ function BotManagementContent({
                         {/* Bot Control Button */}
                         <TouchableOpacity
                           style={[
-                            styles.botButton,
+                            styles.modernBotButton,
                             user.bot_status === 'running'
-                              ? styles.stopButton
-                              : styles.startButton,
+                              ? styles.modernStopButton
+                              : styles.modernStartButton,
                             (user.bot_status === 'starting' || 
                              user.bot_status === 'stopping' || 
-                             loadingBots[user.id]) && styles.disabledButton,
+                             loadingBots[user.id]) && styles.modernDisabledButton,
                           ]}
                           onPress={() =>
                             handleBotToggle(user.id, user.bot_status)
@@ -447,19 +472,25 @@ function BotManagementContent({
                           {(loadingBots[user.id] || 
                             user.bot_status === 'starting' || 
                             user.bot_status === 'stopping') ? (
-                            <ActivityIndicator size="small" color="white" />
+                            <>
+                              <ActivityIndicator size="small" color="white" />
+                              <Text style={styles.modernButtonText}>
+                                {user.bot_status === 'starting' ? 'Startet...' : 
+                                 user.bot_status === 'stopping' ? 'Stoppt...' : 'Lädt...'}
+                              </Text>
+                            </>
                           ) : (
                             <>
                               <Ionicons
                                 name={
                                   user.bot_status === 'running'
-                                    ? 'stop'
-                                    : 'play'
+                                    ? 'stop-circle'
+                                    : 'play-circle'
                                 }
-                                size={16}
+                                size={18}
                                 color="white"
                               />
-                              <Text style={styles.botButtonText}>
+                              <Text style={styles.modernButtonText}>
                                 {user.bot_status === 'running'
                                   ? 'Stoppen'
                                   : 'Starten'}
@@ -776,61 +807,94 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 2,
   },
-  botStats: {
-    fontSize: 11,
-    color: '#86868b',
-    marginTop: 4,
-  },
 
-  // Bot Controls
+  // Bot Stats Row
+  botStatsRow: {
+    marginTop: 8,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statDivider: {
+    width: 1,
+    height: 12,
+    backgroundColor: '#e5e5ea',
+    marginHorizontal: 8,
+  },
+  statText: {
+    fontSize: 12,
+    color: '#86868b',
+    fontWeight: '500',
+  },
+  
+  // Modern Bot Controls
   userRight: {
     alignItems: 'flex-end',
+    minWidth: 120,
   },
-  botStatusContainer: {
-    alignItems: 'center',
-    gap: 12,
+  botControlsContainer: {
+    alignItems: 'flex-end',
+    gap: 8,
   },
-  botStatusBadge: {
+  modernStatusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     borderRadius: 12,
-  },
-  statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'white',
-    marginRight: 6,
-  },
-  botStatusText: {
-    color: 'white',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  botButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 16,
-    minWidth: 90,
+    borderWidth: 1.5,
+    backgroundColor: 'transparent',
+    minWidth: 85,
     justifyContent: 'center',
   },
-  startButton: {
+  modernStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  modernStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  modernBotButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    minWidth: 85,
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  modernStartButton: {
     backgroundColor: '#34c759',
   },
-  stopButton: {
+  modernStopButton: {
     backgroundColor: '#ff3b30',
   },
-  disabledButton: {
+  modernDisabledButton: {
     backgroundColor: '#c7c7cc',
+    shadowOpacity: 0,
+    elevation: 0,
   },
-  botButtonText: {
+  modernButtonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    marginLeft: 6,
+    marginLeft: 4,
   },
 });

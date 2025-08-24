@@ -11,7 +11,7 @@ import {
   FlatList,
   RefreshControl,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
@@ -30,6 +30,7 @@ interface User {
 import { API_BASE_URL } from '@/constants/api';
 
 export default function UserManagement() {
+  const insets = useSafeAreaInsets();
   const [users, setUsers] = useState<User[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [email, setEmail] = useState('');
@@ -448,7 +449,10 @@ export default function UserManagement() {
           data={filteredUsers}
           keyExtractor={item => item.id.toString()}
           renderItem={renderUser}
-          contentContainerStyle={styles.listContainer}
+          contentContainerStyle={[
+            styles.listContainer,
+            { paddingBottom: Math.max(insets.bottom + 100, 120) }
+          ]}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={fetchUsers} />
           }

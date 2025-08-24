@@ -1,18 +1,24 @@
 from typing import List
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import func, and_
 
 from core.auth import get_current_admin_user
 from core.schemas import User, UserCreate
 from core.security import get_password_hash
 from database.database import get_db
 from models.user import User as UserModel
+from models.admin_activity import AdminActivity, ActivityType
+from models.bewerbung import Bewerbung as BewerbungModel
+from models.bot_status import BotStatus
 from services.email_service import email_service
 
 router = APIRouter(prefix="/api/users", tags=["admin"])
+admin_router = APIRouter(prefix="/api/admin", tags=["admin-dashboard"])
 
 
 @router.get("/", response_model=List[User])
@@ -317,9 +323,22 @@ def toggle_user_status(
     if user.id == current_admin.id:
         raise HTTPException(status_code=400, detail="Cannot change your own status")
 
+    old_status = user.is_active
     user.is_active = not user.is_active
+    user.updated_at = datetime.now()
     db.commit()
     db.refresh(user)
+    
+    # Log activity
+    activity_type = ActivityType.USER_BLOCKED if not user.is_active else ActivityType.USER_UNBLOCKED
+    log_admin_activity(
+        db, 
+        activity_type.value, 
+        user.id, 
+        user.email, 
+        f"Benutzer {'blockiert' if not user.is_active else 'entblockiert'} von Admin {current_admin.email}"
+    )
+    
     return {
         "message": f"User status set to {'active' if user.is_active else 'inactive'}",
         "is_active": user.is_active,
@@ -386,3 +405,265 @@ def test_email_configuration(
             "success": False,
             "message": f"Fehler beim Testen der E-Mail-Konfiguration: {str(e)}"
         }
+
+
+@admin_router.get("/dashboard-stats")
+def get_admin_dashboard_stats(
+    db: Session = Depends(get_db),
+    current_admin: UserModel = Depends(get_current_admin_user),
+):
+    """Get statistics for admin dashboard"""
+    try:
+        print("Starting dashboard stats query...")
+        
+        # Alle Benutzer (statt nur aktive)
+        total_users = db.query(UserModel).count()
+        print(f"Total users: {total_users}")
+
+        # Laufende Bots
+        try:
+            running_bots = db.query(BotStatus).filter(BotStatus.status == "running").count()
+            print(f"Running bots: {running_bots}")
+        except Exception as e:
+            print(f"Error querying bot status: {e}")
+            running_bots = 0
+
+        # Anzahl Bewerbungen letzte 24 Stunden (statt eine Woche)
+        twenty_four_hours_ago = datetime.now() - timedelta(hours=24)
+        try:
+            daily_applications = db.query(BewerbungModel).filter(
+                BewerbungModel.bewerbungsdatum >= twenty_four_hours_ago
+            ).count()
+            print(f"Daily applications: {daily_applications}")
+        except Exception as e:
+            print(f"Error querying applications: {e}")
+            daily_applications = 0
+
+        # Blockierte Benutzer
+        blocked_users = db.query(UserModel).filter(UserModel.is_active == False).count()
+        print(f"Blocked users: {blocked_users}")
+
+        # Neue Registrierungen diese Woche
+        one_week_ago = datetime.now() - timedelta(days=7)
+        weekly_registrations = db.query(UserModel).filter(
+            UserModel.created_at >= one_week_ago
+        ).count()
+        print(f"Weekly registrations: {weekly_registrations}")
+
+        # Wochenstatistiken für Chart - Benutzer und gesendete Bewerbungen
+        weekly_chart_data = []
+        try:
+            for i in range(7):
+                day_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=i)
+                day_end = day_start + timedelta(days=1)
+                
+                # Neue Benutzer diesen Tag
+                users_count = db.query(UserModel).filter(
+                    and_(
+                        UserModel.created_at >= day_start,
+                        UserModel.created_at < day_end
+                    )
+                ).count()
+                
+                # Gesendete Bewerbungen diesen Tag
+                try:
+                    applications_count = db.query(BewerbungModel).filter(
+                        and_(
+                            BewerbungModel.bewerbungsdatum >= day_start,
+                            BewerbungModel.bewerbungsdatum < day_end
+                        )
+                    ).count()
+                except Exception as e:
+                    print(f"Error querying daily applications for {day_start}: {e}")
+                    applications_count = 0
+                
+                weekday = day_start.strftime('%a')
+                day_name_mapping = {
+                    'Mon': 'Mo', 'Tue': 'Di', 'Wed': 'Mi', 'Thu': 'Do',
+                    'Fri': 'Fr', 'Sat': 'Sa', 'Sun': 'So'
+                }
+                day_name = day_name_mapping.get(weekday, weekday)
+                
+                weekly_chart_data.append({
+                    "day": day_name,
+                    "users": users_count,
+                    "applications": applications_count,
+                    "userHeight": max(min(users_count * 8, 120), 8),
+                    "appHeight": max(min(applications_count * 2, 120), 8)
+                })
+            
+            # Reverse für chronologische Reihenfolge
+            weekly_chart_data.reverse()
+        except Exception as e:
+            print(f"Error generating weekly chart data: {e}")
+            weekly_chart_data = []
+
+        return {
+            "stats": {
+                "total_users": total_users,
+                "running_bots": running_bots,
+                "daily_applications": daily_applications,
+                "blocked_users": blocked_users,
+                "weekly_registrations": weekly_registrations
+            },
+            "weekly_chart_data": weekly_chart_data
+        }
+
+    except Exception as e:
+        print(f"Error getting dashboard stats: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting dashboard stats: {str(e)}")
+
+
+def log_admin_activity(db: Session, activity_type: str, user_id: int = None, user_email: str = None, description: str = ""):
+    """Helper function to log admin activities"""
+    try:
+        activity = AdminActivity(
+            activity_type=activity_type,
+            user_id=user_id,
+            user_email=user_email,
+            description=description
+        )
+        db.add(activity)
+        db.commit()
+    except Exception as e:
+        print(f"Error logging admin activity: {e}")
+
+
+@admin_router.get("/recent-activities")
+def get_recent_activities(
+    limit: int = Query(10, ge=1, le=50),
+    db: Session = Depends(get_db),
+    current_admin: UserModel = Depends(get_current_admin_user),
+):
+    """Get recent activities for admin dashboard"""
+    try:
+        print("Starting recent activities query...")
+        activities = []
+        
+        # Zeitraum für Aktivitäten erweitern (letzte 7 Tage statt 24h)
+        one_week_ago = datetime.now() - timedelta(days=7)
+        print(f"Looking for activities since: {one_week_ago}")
+        
+        # Neue Registrierungen
+        new_users = db.query(UserModel).filter(
+            UserModel.created_at >= one_week_ago
+        ).order_by(UserModel.created_at.desc()).limit(10).all()
+        
+        for user in new_users:
+            time_diff = datetime.now() - user.created_at
+            if time_diff.days > 0:
+                time_str = f"vor {time_diff.days} Tag{'en' if time_diff.days > 1 else ''}"
+            elif time_diff.seconds < 3600:
+                time_str = f"vor {max(1, time_diff.seconds // 60)} Minuten"
+            else:
+                time_str = f"vor {time_diff.seconds // 3600} Stunden"
+                
+            activities.append({
+                "activity": "Neue Benutzer Registrierung",
+                "user": user.email,
+                "time": time_str,
+                "type": "Registrierung",
+                "typeColor": "#34c759",
+                "timestamp": user.created_at
+            })
+
+        # Bot Aktivitäten - alle Bot Status Änderungen (optimized query)
+        try:
+            # Limit to more recent timeframe for performance
+            recent_timeframe = datetime.now() - timedelta(hours=72)  # Last 3 days instead of 7
+            all_bot_statuses = db.query(BotStatus).filter(
+                BotStatus.updated_at >= recent_timeframe
+            ).order_by(BotStatus.updated_at.desc()).limit(5).all()
+            print(f"Found {len(all_bot_statuses)} bot status changes")
+            
+            for bot_status in all_bot_statuses:
+                if bot_status.user_id:
+                    # Get user separately to avoid join overhead
+                    user = db.query(UserModel).filter(UserModel.id == bot_status.user_id).first()
+                    if user:
+                        time_diff = datetime.now() - bot_status.updated_at
+                        if time_diff.days > 0:
+                            time_str = f"vor {time_diff.days} Tag{'en' if time_diff.days > 1 else ''}"
+                        elif time_diff.seconds < 3600:
+                            time_str = f"vor {max(1, time_diff.seconds // 60)} Minuten"
+                        else:
+                            time_str = f"vor {time_diff.seconds // 3600} Stunden"
+                            
+                        activity_text = "Bot gestartet" if bot_status.status == "running" else "Bot gestoppt"
+                        activities.append({
+                            "activity": activity_text,
+                            "user": user.email,
+                            "time": time_str,
+                            "type": "Bot Aktivität",
+                            "typeColor": "#007aff",
+                            "timestamp": bot_status.updated_at
+                        })
+        except Exception as e:
+            print(f"Error querying bot activities: {e}")
+
+        # Blockierte/Entblockierte Benutzer
+        recently_changed_users = db.query(UserModel).filter(
+            UserModel.updated_at >= one_week_ago
+        ).order_by(UserModel.updated_at.desc()).limit(10).all()
+        
+        for user in recently_changed_users:
+            # Nur wenn sich der Status geändert hat
+            if user.created_at != user.updated_at:
+                time_diff = datetime.now() - user.updated_at
+                if time_diff.days > 0:
+                    time_str = f"vor {time_diff.days} Tag{'en' if time_diff.days > 1 else ''}"
+                elif time_diff.seconds < 3600:
+                    time_str = f"vor {max(1, time_diff.seconds // 60)} Minuten"
+                else:
+                    time_str = f"vor {time_diff.seconds // 3600} Stunden"
+                    
+                activity_text = "Benutzer blockiert" if not user.is_active else "Benutzer entblockiert"
+                color = "#ff3b30" if not user.is_active else "#34c759"
+                activities.append({
+                    "activity": activity_text,
+                    "user": user.email,
+                    "time": time_str,
+                    "type": "Moderation",
+                    "typeColor": color,
+                    "timestamp": user.updated_at
+                })
+
+        # Bewerbungen der letzten 24 Stunden (optimized)
+        try:
+            # Simple query without join first, then get user data separately if needed
+            recent_applications = db.query(BewerbungModel).filter(
+                BewerbungModel.bewerbungsdatum >= datetime.now() - timedelta(hours=24)
+            ).order_by(BewerbungModel.bewerbungsdatum.desc()).limit(3).all()
+            print(f"Found {len(recent_applications)} recent applications")
+            
+            for bewerbung in recent_applications:
+                if bewerbung.user_id:
+                    # Get user separately to avoid join overhead
+                    user = db.query(UserModel).filter(UserModel.id == bewerbung.user_id).first()
+                    if user:
+                        time_diff = datetime.now() - bewerbung.bewerbungsdatum
+                        if time_diff.seconds < 3600:
+                            time_str = f"vor {max(1, time_diff.seconds // 60)} Minuten"
+                        else:
+                            time_str = f"vor {time_diff.seconds // 3600} Stunden"
+                            
+                        activities.append({
+                            "activity": "Bewerbung versendet",
+                            "user": user.email,
+                            "time": time_str,
+                            "type": "Bewerbung",
+                            "typeColor": "#ff9500",
+                            "timestamp": bewerbung.bewerbungsdatum
+                        })
+        except Exception as e:
+            print(f"Error querying recent applications: {e}")
+
+        # Sortiere nach Zeitstempel (neueste zuerst)
+        activities.sort(key=lambda x: x.get("timestamp", datetime.min), reverse=True)
+        print(f"Returning {len(activities)} activities")
+        
+        return {"activities": activities[:limit]}
+
+    except Exception as e:
+        print(f"Error getting recent activities: {e}")
+        raise HTTPException(status_code=500, detail=f"Error getting recent activities: {str(e)}")
